@@ -15,6 +15,61 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# ─── CREDENCIALES DE ACCESO ───────────────────────────────────────────────────
+USUARIOS = {
+    "DEMO":  "1234",
+    "EERSSA": "monitor2026",
+}
+
+def login_page():
+    st.markdown("""
+    <style>
+    [data-testid="stAppViewContainer"] { background: #0d1b2e; }
+    .login-box {
+        background: #1e2535; border-radius: 14px;
+        padding: 2.5rem 2rem; max-width: 420px; margin: auto;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    _, mid, _ = st.columns([1, 2, 1])
+    with mid:
+        st.markdown("""
+        <div class="login-box">
+          <div style="text-align:center;margin-bottom:1.5rem;">
+            <span style="font-size:2.8rem;">⚡</span>
+            <h2 style="color:white;margin:0.3rem 0 0.2rem;">Monitoreo Remoto</h2>
+            <p style="color:#90caf9;font-size:0.85rem;margin:0;">
+              UPS · Generadores · Aires Acondicionados
+            </p>
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        usuario = st.text_input("Usuario", placeholder="Ingrese su usuario")
+        clave   = st.text_input("Contraseña", type="password", placeholder="Ingrese su contraseña")
+
+        if st.button("▶  Ingresar", use_container_width=True, type="primary"):
+            if usuario in USUARIOS and USUARIOS[usuario] == clave:
+                st.session_state["auth"] = True
+                st.session_state["user"] = usuario
+                st.rerun()
+            else:
+                st.error("Usuario o contraseña incorrectos")
+
+        st.markdown("""
+        <p style="color:#546e7a;font-size:0.78rem;text-align:center;margin-top:1rem;">
+          Acceso restringido · Solo personal autorizado
+        </p>
+        """, unsafe_allow_html=True)
+
+if not st.session_state.get("auth"):
+    login_page()
+    st.stop()
+
+# ─── APP PRINCIPAL (solo si autenticado) ──────────────────────────────────────
+
 st.markdown("""
 <style>
 [data-testid="stAppViewContainer"] { background: #0f1117; }
@@ -237,8 +292,12 @@ with st.sidebar:
     intervalo = st.slider("Intervalo refresco (seg)", 3, 30, 5) if auto_refresh else 9999
 
     st.markdown("---")
+    st.caption(f"👤 Usuario: **{st.session_state.get('user', '')}**")
     st.caption(f"🕐 {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
     st.caption("Demo v2.0")
+    if st.button("🚪 Cerrar sesión", use_container_width=True):
+        st.session_state["auth"] = False
+        st.rerun()
 
 # ─── HEADER ───────────────────────────────────────────────────────────────────
 tipo_color = {"UPS": "#1565c0", "Generador": "#2e7d32", "Aire Acondicionado": "#e65100"}
