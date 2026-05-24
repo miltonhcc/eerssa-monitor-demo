@@ -362,22 +362,28 @@ def sala_3d_html(tick, height=500):
     def st_(key): return statuses.get(key, "ok")
 
     equip_3d = [
-        {"name":"TRAFO-01 630kVA",  "val":"15kV→440V · 72%",  "x":-7.0,"z":-6.5,"w":2.5,"h":3.0,"d":1.5,"baseColor":0x1a1200,"status":"ok"},
-        {"name":"TRAFO-02 315kVA",  "val":"15kV→220V · 58%",  "x":-4.2,"z":-6.5,"w":2.0,"h":2.8,"d":1.5,"baseColor":0x1a1200,"status":"ok"},
-        {"name":"CELDA MV-1",       "val":"15kV · 320A",       "x":-0.9,"z":-6.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0x0d1520,"status":"ok"},
-        {"name":"CELDA MV-2",       "val":"15kV · 280A",       "x": 0.2,"z":-6.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0x0d1520,"status":"ok"},
-        {"name":"CELDA MV-3",       "val":"15kV · 305A",       "x": 1.3,"z":-6.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0x0d1520,"status":"ok"},
-        {"name":"CELDA MV-4",       "val":"⚠ ALARMA · 298A",  "x": 2.4,"z":-6.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0x0d1520,"status":"warn"},
-        {"name":"CELDA MV-5",       "val":"15kV · 201A",       "x": 3.5,"z":-6.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0x0d1520,"status":"ok"},
-        {"name":"UPS-01 80kVA",     "val":"220V · Bat:85%",    "x":-5.0,"z":-1.0,"w":1.2,"h":2.2,"d":0.8,"baseColor":0x0a1e2a,"status":st_("UPS-01  (80 kVA)")},
-        {"name":"UPS-02 40kVA",     "val":"220V · Bat:92%",    "x":-3.5,"z":-1.0,"w":1.0,"h":2.2,"d":0.8,"baseColor":0x0a1e2a,"status":st_("UPS-02  (40 kVA)")},
-        {"name":"GEN-01 250kVA",    "val":"220V · 1500rpm",    "x": 5.5,"z":-2.0,"w":2.8,"h":1.8,"d":1.4,"baseColor":0x0a1a0a,"status":st_("GEN-01  (250 kVA)")},
-        {"name":"GEN-02 150kVA",    "val":"OFFLINE",           "x": 5.5,"z": 0.5,"w":2.2,"h":1.6,"d":1.2,"baseColor":0x150808,"status":st_("GEN-02  (150 kVA)")},
-        {"name":"AC-01 Servidores", "val":"21.5°C · 48%HR",   "x":-4.0,"z": 5.5,"w":0.9,"h":1.9,"d":0.6,"baseColor":0x1a0f00,"status":st_("AC-01  Sala Servidores")},
-        {"name":"AC-02 Sala UPS",   "val":"22.0°C · 50%HR",   "x":-2.5,"z": 5.5,"w":0.9,"h":1.9,"d":0.6,"baseColor":0x1a0f00,"status":st_("AC-02  Sala UPS")},
-        {"name":"AC-03 Generadores","val":"23.0°C · 55%HR",   "x":-1.0,"z": 5.5,"w":0.9,"h":1.9,"d":0.6,"baseColor":0x1a0800,"status":st_("AC-03  Sala Generadores")},
-        {"name":"TABLERO BT-1",     "val":"440V · 450A",       "x": 2.0,"z":-1.5,"w":0.9,"h":2.0,"d":0.5,"baseColor":0x0a1030,"status":"ok"},
-        {"name":"TABLERO BT-2",     "val":"220V · 280A",       "x": 3.2,"z":-1.5,"w":0.9,"h":2.0,"d":0.5,"baseColor":0x0a1030,"status":"ok"},
+        # Transformadores — gabinete color arena/beige (estilo carcasa metálica)
+        {"name":"TRAFO-01 630kVA",  "val":"15kV→440V · 72%",  "x":-7.0,"z":-6.5,"w":2.5,"h":3.0,"d":1.5,"baseColor":0xc8c0a0,"status":"ok"},
+        {"name":"TRAFO-02 315kVA",  "val":"15kV→220V · 58%",  "x":-4.2,"z":-6.5,"w":2.0,"h":2.8,"d":1.5,"baseColor":0xc8c0a0,"status":"ok"},
+        # Celdas MV — blanco/gris claro estilo KYN28
+        {"name":"CELDA MV-1",       "val":"15kV · 320A",       "x":-0.9,"z":-6.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0xd8dce4,"status":"ok"},
+        {"name":"CELDA MV-2",       "val":"15kV · 280A",       "x": 0.2,"z":-6.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0xd8dce4,"status":"ok"},
+        {"name":"CELDA MV-3",       "val":"15kV · 305A",       "x": 1.3,"z":-6.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0xd8dce4,"status":"ok"},
+        {"name":"CELDA MV-4",       "val":"⚠ ALARMA · 298A",  "x": 2.4,"z":-6.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0xd8dce4,"status":"warn"},
+        {"name":"CELDA MV-5",       "val":"15kV · 201A",       "x": 3.5,"z":-6.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0xd8dce4,"status":"ok"},
+        # UPS — blanco grisáceo (gabinete tipo rack)
+        {"name":"UPS-01 80kVA",     "val":"220V · Bat:85%",    "x":-5.0,"z":-1.0,"w":1.2,"h":2.2,"d":0.8,"baseColor":0xd0d8e0,"status":st_("UPS-01  (80 kVA)")},
+        {"name":"UPS-02 40kVA",     "val":"220V · Bat:92%",    "x":-3.5,"z":-1.0,"w":1.0,"h":2.2,"d":0.8,"baseColor":0xd0d8e0,"status":st_("UPS-02  (40 kVA)")},
+        # Generadores — verde-gris industrial
+        {"name":"GEN-01 250kVA",    "val":"220V · 1500rpm",    "x": 5.5,"z":-2.0,"w":2.8,"h":1.8,"d":1.4,"baseColor":0xc8d4c4,"status":st_("GEN-01  (250 kVA)")},
+        {"name":"GEN-02 150kVA",    "val":"OFFLINE",           "x": 5.5,"z": 0.5,"w":2.2,"h":1.6,"d":1.2,"baseColor":0xd4c8c8,"status":st_("GEN-02  (150 kVA)")},
+        # Aires acondicionados — gris claro
+        {"name":"AC-01 Servidores", "val":"21.5°C · 48%HR",   "x":-4.0,"z": 5.5,"w":0.9,"h":1.9,"d":0.6,"baseColor":0xe4e0d8,"status":st_("AC-01  Sala Servidores")},
+        {"name":"AC-02 Sala UPS",   "val":"22.0°C · 50%HR",   "x":-2.5,"z": 5.5,"w":0.9,"h":1.9,"d":0.6,"baseColor":0xe4e0d8,"status":st_("AC-02  Sala UPS")},
+        {"name":"AC-03 Generadores","val":"23.0°C · 55%HR",   "x":-1.0,"z": 5.5,"w":0.9,"h":1.9,"d":0.6,"baseColor":0xe4e0d8,"status":st_("AC-03  Sala Generadores")},
+        # Tableros BT — gris azulado
+        {"name":"TABLERO BT-1",     "val":"440V · 450A",       "x": 2.0,"z":-1.5,"w":0.9,"h":2.0,"d":0.5,"baseColor":0xd0d0e0,"status":"ok"},
+        {"name":"TABLERO BT-2",     "val":"220V · 280A",       "x": 3.2,"z":-1.5,"w":0.9,"h":2.0,"d":0.5,"baseColor":0xd0d0e0,"status":"ok"},
     ]
     eq_json = json.dumps(equip_3d)
     H = height
@@ -388,13 +394,15 @@ def sala_3d_html(tick, height=500):
 body{{background:#0a0e1a;overflow:hidden;font-family:monospace}}
 #cc{{position:relative;width:100%;height:{H}px}}
 canvas{{display:block;width:100%!important;height:{H}px!important}}
-.lbl{{position:absolute;pointer-events:none;color:#e0e0e0;font-size:10px;
-      background:rgba(5,10,22,.88);padding:3px 8px;border-radius:4px;
-      border:1px solid #333;white-space:nowrap;transform:translate(-50%,-110%);line-height:1.6}}
-.lbl.ok  {{border-color:#4CAF50}}
-.lbl.warn{{border-color:#FF9800}}
-.lbl.crit{{border-color:#f44336}}
-.lbl.off {{border-color:#607d8b;opacity:.5}}
+.lbl{{position:absolute;pointer-events:none;color:#d0eaff;font-size:10px;
+      background:rgba(8,25,80,.88);padding:4px 10px;border-radius:5px;
+      border:1px solid rgba(38,198,218,.65);white-space:nowrap;
+      transform:translate(-50%,-115%);line-height:1.7;
+      box-shadow:0 2px 8px rgba(0,80,200,.35)}}
+.lbl.ok  {{border-color:rgba(76,175,80,.8)}}
+.lbl.warn{{border-color:rgba(255,152,0,.9)}}
+.lbl.crit{{border-color:rgba(244,67,54,.9)}}
+.lbl.off {{border-color:rgba(96,125,139,.6);opacity:.55}}
 #tip{{position:absolute;bottom:8px;right:10px;color:#37474f;font-size:9px}}
 </style></head><body>
 <div id="cc"><canvas id="c"></canvas><div id="lbls"></div>
@@ -406,8 +414,8 @@ const equipData={eq_json};
 const cc=document.getElementById('cc');
 const W=cc.clientWidth||900,H={H};
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x0a0e1a);
-scene.fog=new THREE.Fog(0x0a0e1a,28,50);
+scene.background=new THREE.Color(0x081428);
+scene.fog=new THREE.Fog(0x081428,30,55);
 const camera=new THREE.PerspectiveCamera(52,W/H,.1,100);
 camera.position.set(10,12,17);
 const renderer=new THREE.WebGLRenderer({{canvas:document.getElementById('c'),antialias:true}});
@@ -416,18 +424,18 @@ renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 const ctrl=new THREE.OrbitControls(camera,renderer.domElement);
 ctrl.enableDamping=true;ctrl.dampingFactor=.08;ctrl.target.set(0,1.5,0);
 ctrl.maxPolarAngle=Math.PI/2.05;ctrl.minDistance=5;ctrl.maxDistance=38;
-scene.add(new THREE.AmbientLight(0x203040,4));
-const sun=new THREE.DirectionalLight(0xffffff,1.3);
+scene.add(new THREE.AmbientLight(0xc0d8f0,5.5));
+const sun=new THREE.DirectionalLight(0xffffff,2.0);
 sun.position.set(8,15,8);sun.castShadow=true;
 sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.near=.5;sun.shadow.camera.far=60;
 sun.shadow.camera.left=sun.shadow.camera.bottom=-16;
 sun.shadow.camera.right=sun.shadow.camera.top=16;
 scene.add(sun);
 scene.add(new THREE.DirectionalLight(0x26C6DA,.35));
-const fl=new THREE.Mesh(new THREE.PlaneGeometry(28,24),new THREE.MeshLambertMaterial({{color:0x0d1520}}));
+const fl=new THREE.Mesh(new THREE.PlaneGeometry(28,24),new THREE.MeshLambertMaterial({{color:0x1535a0}}));
 fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;scene.add(fl);
-const grid=new THREE.GridHelper(28,28,0x1a2a3a,0x111e2a);grid.position.y=.005;scene.add(grid);
-const wallM=new THREE.MeshLambertMaterial({{color:0x07101a,side:THREE.BackSide}});
+const grid=new THREE.GridHelper(28,28,0x2040b0,0x1030a0);grid.position.y=.005;scene.add(grid);
+const wallM=new THREE.MeshLambertMaterial({{color:0x0e1e50,side:THREE.BackSide}});
 const roomM=new THREE.Mesh(new THREE.BoxGeometry(28,10,24),wallM);
 roomM.position.y=5;scene.add(roomM);
 for(let x=-9;x<=9;x+=9)for(let z=-7;z<=7;z+=7){{
@@ -440,8 +448,11 @@ const groups=[];
 function mkEq(e){{
   const g=new THREE.Group();g.position.set(e.x,e.h/2,e.z);
   const body=new THREE.Mesh(new THREE.BoxGeometry(e.w,e.h,e.d),
-    new THREE.MeshPhongMaterial({{color:e.baseColor,specular:0x111111,shininess:45}}));
+    new THREE.MeshPhongMaterial({{color:e.baseColor,specular:0x777777,shininess:90}}));
   body.castShadow=true;body.receiveShadow=true;g.add(body);
+  const stripe=new THREE.Mesh(new THREE.BoxGeometry(e.w+.01,0.13,e.d+.01),
+    new THREE.MeshBasicMaterial({{color:0xCC2222}}));
+  stripe.position.set(0,e.h/2-0.065,0);g.add(stripe);
   const sc=SC[e.status]||SC.ok;
   g.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(e.w,e.h,e.d)),
     new THREE.LineBasicMaterial({{color:sc}})));
@@ -494,6 +505,244 @@ const clk=new THREE.Clock();
 }})();
 </script></body></html>"""
 
+# ─── FUNCIÓN: DIAGRAMA UNIFILAR SVG ───────────────────────────────────────────
+def unifilar_html(tick):
+    rng = np.random.default_rng(tick % 9999)
+    def nv(b, n): return b + float(rng.uniform(-n, n))
+
+    feeders = [
+        {"x":140,"name":"MV-1 ENTRADA",  "sub":"Red 15kV",         "ia":nv(320,5),"ib":nv(318,5),"ic":nv(321,5),"p":nv(4.82,.2),"q":nv(1.21,.1),"pf":nv(0.943,.008),"epi":85230,"state":"closed","alarm":False,"arrow_up":True},
+        {"x":300,"name":"MV-2 PROTECC.", "sub":"Protección",        "ia":nv(280,4),"ib":nv(278,4),"ic":nv(282,4),"p":nv(4.12,.15),"q":nv(0.98,.08),"pf":nv(0.972,.006),"epi":72100,"state":"closed","alarm":False,"arrow_up":False},
+        {"x":460,"name":"MV-3 MEDICIÓN", "sub":"TC + TP zona A",    "ia":nv(305,4),"ib":nv(303,4),"ic":nv(307,4),"p":nv(4.51,.15),"q":nv(1.05,.08),"pf":nv(0.974,.006),"epi":78500,"state":"closed","alarm":False,"arrow_up":False},
+        {"x":620,"name":"MV-4 SAL-T1",   "sub":"→ TRAFO-01 630kVA", "ia":nv(298,6),"ib":nv(296,6),"ic":nv(300,6),"p":nv(4.45,.2),"q":nv(1.15,.1),"pf":nv(0.968,.01),"epi":76820,"state":"closed","alarm":True,"arrow_up":False},
+        {"x":780,"name":"MV-5 SAL-T2",   "sub":"→ TRAFO-02 315kVA", "ia":nv(201,4),"ib":nv(199,4),"ic":nv(203,4),"p":nv(2.98,.1),"q":nv(0.74,.07),"pf":nv(0.970,.006),"epi":51230,"state":"closed","alarm":False,"arrow_up":False},
+        {"x":940,"name":"MV-6 SECCION.", "sub":"Seccionador",        "ia":0,"ib":0,"ic":0,"p":0,"q":0,"pf":1.0,"epi":0,"state":"open","alarm":False,"arrow_up":False},
+    ]
+
+    svg_parts = []
+    for f in feeders:
+        x = f["x"]
+        lc  = "#FF9800" if f["alarm"] else "#607d8b" if f["state"]=="open" else "#CC2222"
+        led = "#FF9800" if f["alarm"] else "#607d8b" if f["state"]=="open" else "#4CAF50"
+        dash = 'stroke-dasharray="8,5"' if f["state"]=="open" else ""
+        gc   = "#607d8b" if f["state"]=="open" else "#4CAF50"
+
+        if f.get("arrow_up"):
+            svg_parts += [
+                f'<line x1="{x}" y1="44" x2="{x}" y2="86" stroke="#CC2222" stroke-width="3"/>',
+                f'<polygon points="{x},44 {x-8},60 {x+8},60" fill="#CC2222"/>',
+                f'<text x="{x}" y="40" fill="#90a4ae" font-size="9" text-anchor="middle" font-family="monospace">RED 15kV</text>',
+            ]
+        svg_parts += [
+            f'<line x1="{x}" y1="200" x2="{x}" y2="450" stroke="{lc}" stroke-width="2.5" {dash}/>',
+            f'<rect x="{x-13}" y="262" width="26" height="16" fill="#060d1e" stroke="{lc}" stroke-width="2" rx="2"/>',
+        ]
+        if f["state"]=="closed":
+            svg_parts.append(f'<line x1="{x-10}" y1="270" x2="{x+10}" y2="270" stroke="{led}" stroke-width="2.5"/>')
+        else:
+            svg_parts.append(f'<line x1="{x-9}" y1="265" x2="{x+9}" y2="275" stroke="#607d8b" stroke-width="1.8"/>')
+        svg_parts += [
+            f'<ellipse cx="{x}" cy="332" rx="13" ry="7" fill="none" stroke="#FF9800" stroke-width="1.5"/>',
+            f'<circle cx="{x+16}" cy="270" r="5" fill="{led}"/>',
+            f'<polygon points="{x},450 {x-17},472 {x+17},472" fill="none" stroke="{gc}" stroke-width="2"/>',
+            f'<line x1="{x}" y1="472" x2="{x}" y2="488" stroke="{gc}" stroke-width="2"/>',
+            f'<line x1="{x-13}" y1="488" x2="{x+13}" y2="488" stroke="{gc}" stroke-width="2"/>',
+            f'<line x1="{x-8}" y1="495" x2="{x+8}" y2="495" stroke="{gc}" stroke-width="1.5"/>',
+            f'<line x1="{x-3}" y1="502" x2="{x+3}" y2="502" stroke="{gc}" stroke-width="1"/>',
+            f'<text x="{x}" y="197" fill="#546e7a" font-size="8.5" text-anchor="middle" font-family="monospace">{f["name"]}</text>',
+        ]
+        bx, by, bw, bh = x-80, 520, 160, 100 if f["state"]!="open" else 38
+        aks = "#FF9800" if f["alarm"] else "#1a2d3e"
+        svg_parts += [
+            f'<rect x="{bx}" y="{by}" width="{bw}" height="{bh}" rx="3" fill="rgba(6,14,32,.92)" stroke="{aks}" stroke-width="1.2"/>',
+            f'<text x="{x}" y="{by+13}" fill="{"#FF9800" if f["alarm"] else "#26C6DA"}" font-size="9" text-anchor="middle" font-family="monospace" font-weight="bold">{f["name"]}</text>',
+            f'<text x="{x}" y="{by+25}" fill="#546e7a" font-size="8" text-anchor="middle" font-family="monospace">{f["sub"]}</text>',
+        ]
+        if f["state"] != "open":
+            y0 = by + 38
+            svg_parts += [
+                f'<text x="{bx+5}" y="{y0}" fill="#90a4ae" font-size="8" font-family="monospace">Ia <tspan fill="white">{f["ia"]:.0f}A</tspan>  Ib <tspan fill="white">{f["ib"]:.0f}A</tspan>  Ic <tspan fill="white">{f["ic"]:.0f}A</tspan></text>',
+                f'<text x="{bx+5}" y="{y0+14}" fill="#90a4ae" font-size="8" font-family="monospace">P <tspan fill="#4CAF50">{f["p"]:.2f}kW</tspan>   Q <tspan fill="white">{f["q"]:.2f}kVar</tspan>   PF <tspan fill="white">{f["pf"]:.3f}</tspan></text>',
+                f'<text x="{bx+5}" y="{y0+28}" fill="#90a4ae" font-size="8" font-family="monospace">EPI <tspan fill="#FDD835">{f["epi"]:,.0f} kWh</tspan></text>',
+                f'<text x="{bx+5}" y="{y0+42}" fill="#546e7a" font-size="7.5" font-family="monospace">Ua {nv(15.0,.05):.2f}kV  Ub {nv(15.0,.05):.2f}kV  Uc {nv(15.0,.05):.2f}kV</text>',
+            ]
+        else:
+            svg_parts.append(f'<text x="{x}" y="{by+32}" fill="#607d8b" font-size="8.5" text-anchor="middle" font-family="monospace">ABIERTO / SIN CARGA</text>')
+
+    body = "\n  ".join(svg_parts)
+    ts   = datetime.now().strftime("%H:%M:%S")
+
+    return f"""<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>*{{margin:0;padding:0}}body{{background:#060d1e;overflow:hidden}}</style>
+</head><body>
+<svg viewBox="0 0 1080 645" style="width:100%;height:645px;background:#060d1e">
+  <!-- Header -->
+  <rect x="0" y="0" width="1080" height="36" fill="#0a1628"/>
+  <text x="540" y="23" fill="#26C6DA" font-size="13" font-family="monospace"
+        text-anchor="middle" font-weight="bold">
+    CENTROSUR · DIAGRAMA UNIFILAR SUBESTACIÓN 15 kV
+  </text>
+  <circle cx="18" cy="18" r="5" fill="#4CAF50">
+    <animate attributeName="opacity" values="1;0.15;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="28" y="22" fill="#4CAF50" font-size="8" font-family="monospace">EN VIVO</text>
+  <text x="1070" y="22" fill="#546e7a" font-size="8" font-family="monospace" text-anchor="end">{ts}</text>
+
+  <!-- Transformer -->
+  <line x1="140" y1="36" x2="140" y2="68" stroke="#CC2222" stroke-width="3"/>
+  <circle cx="140" cy="93" r="24" fill="none" stroke="#CC2222" stroke-width="2.5"/>
+  <circle cx="140" cy="140" r="24" fill="none" stroke="#CC2222" stroke-width="2.5"/>
+  <text x="140" y="97" fill="#CC2222" font-size="11" text-anchor="middle">Y</text>
+  <text x="140" y="145" fill="#CC2222" font-size="10" text-anchor="middle">Δ</text>
+  <line x1="140" y1="164" x2="140" y2="200" stroke="#CC2222" stroke-width="3"/>
+  <!-- Trafo data -->
+  <rect x="170" y="72" width="150" height="88" rx="3" fill="rgba(6,14,32,.9)" stroke="#1a2d3e" stroke-width="1"/>
+  <text x="177" y="87" fill="#FDD835" font-size="9" font-family="monospace" font-weight="bold">TRAFO-P  630 kVA</text>
+  <text x="177" y="101" fill="#90a4ae" font-size="8.5" font-family="monospace">66 kV / 15 kV  Dyn11</text>
+  <text x="177" y="115" fill="#90a4ae" font-size="8.5" font-family="monospace">Carga: <tspan fill="#4CAF50">72%</tspan>   T° <tspan fill="white">65.2°C</tspan></text>
+  <text x="177" y="129" fill="#90a4ae" font-size="8.5" font-family="monospace">EPI: <tspan fill="#FDD835">485,230 kWh</tspan></text>
+  <text x="177" y="143" fill="#90a4ae" font-size="8.5" font-family="monospace">Estado: <tspan fill="#4CAF50">NORMAL</tspan></text>
+  <text x="177" y="157" fill="#546e7a" font-size="8" font-family="monospace">Pn: 344.1 kW  Qn: -4.1 kVar</text>
+
+  <!-- 15kV BUSBAR -->
+  <line x1="50" y1="200" x2="1030" y2="200" stroke="#CC2222" stroke-width="6"/>
+  <rect x="50" y="193" width="980" height="4" fill="rgba(204,0,0,.2)"/>
+  <text x="28" y="205" fill="#CC2222" font-size="10" font-family="monospace" font-weight="bold">15kV</text>
+
+  <!-- FEEDERS -->
+  {body}
+
+  <!-- Legend -->
+  <rect x="940" y="44" width="130" height="148" rx="4" fill="rgba(6,14,32,.92)" stroke="#1a2d3e" stroke-width="1"/>
+  <text x="948" y="60" fill="#26C6DA" font-size="9" font-family="monospace" font-weight="bold">LEYENDA</text>
+  <line x1="948" y1="72" x2="968" y2="72" stroke="#CC2222" stroke-width="2.5"/>
+  <text x="973" y="75" fill="#90a4ae" font-size="8" font-family="monospace">Conductor 15kV</text>
+  <rect x="948" y="82" width="16" height="10" fill="none" stroke="#4CAF50" stroke-width="1.5" rx="1"/>
+  <line x1="948" y1="87" x2="964" y2="87" stroke="#4CAF50" stroke-width="2"/>
+  <text x="973" y="91" fill="#90a4ae" font-size="8" font-family="monospace">Inter. cerrado</text>
+  <rect x="948" y="98" width="16" height="10" fill="none" stroke="#607d8b" stroke-width="1.5" rx="1"/>
+  <line x1="950" y1="100" x2="964" y2="108" stroke="#607d8b" stroke-width="1.5"/>
+  <text x="973" y="107" fill="#90a4ae" font-size="8" font-family="monospace">Inter. abierto</text>
+  <ellipse cx="956" cy="122" rx="9" ry="5" fill="none" stroke="#FF9800" stroke-width="1.5"/>
+  <text x="973" y="125" fill="#90a4ae" font-size="8" font-family="monospace">TC (transf. corriente)</text>
+  <polygon points="956,135 948,150 964,150" fill="none" stroke="#4CAF50" stroke-width="1.5"/>
+  <text x="973" y="146" fill="#90a4ae" font-size="8" font-family="monospace">Tierra / neutro</text>
+  <circle cx="956" cy="162" r="5" fill="#FF9800"/>
+  <text x="973" y="165" fill="#90a4ae" font-size="8" font-family="monospace">Alarma activa</text>
+  <circle cx="956" cy="178" r="5" fill="#4CAF50"/>
+  <text x="973" y="181" fill="#90a4ae" font-size="8" font-family="monospace">Normal / OK</text>
+</svg>
+</body></html>"""
+
+# ─── FUNCIÓN: DIAGRAMA DE STRINGS FV ──────────────────────────────────────────
+def pv_string_html():
+    rng = np.random.default_rng(int(time.time()//120))
+    def nv(b,n): return b + float(rng.uniform(-n,n))
+    strings = [
+        {"label":"String 1A","panels":12,"vdc":nv(502,8),"idc":nv(2.1,.15),"kwp":11.5,"side":"left"},
+        {"label":"String 1B","panels":12,"vdc":nv(498,8),"idc":nv(2.05,.15),"kwp":11.5,"side":"left"},
+        {"label":"String 2A","panels":12,"vdc":nv(582,8),"idc":nv(3.0,.2),"kwp":11.5,"side":"right"},
+        {"label":"String 2B","panels":12,"vdc":nv(599,8),"idc":nv(1.9,.15),"kwp":11.5,"side":"right"},
+    ]
+    inv = [
+        {"id":"INV-01","brand":"GoodWe","model":"GW20K-DT","pmax_dc":26,"pmax_ac":20,
+         "ua":nv(235.2,.8),"ub":nv(224,.8),"uc":nv(237.1,.8),
+         "ia":nv(4.7,.3),"ib":nv(4.7,.3),"ic":nv(4.7,.3),
+         "p_kw":nv(3.47,.2),"pf":"—","hz":50.0,"x":230},
+        {"id":"INV-02","brand":"GoodWe","model":"GW20K-DT","pmax_dc":26,"pmax_ac":20,
+         "ua":nv(235.2,.8),"ub":nv(224,.8),"uc":nv(237.1,.8),
+         "ia":nv(5.4,.3),"ib":nv(5.3,.3),"ic":nv(5.3,.3),
+         "p_kw":nv(3.83,.2),"pf":"—","hz":50.0,"x":730},
+    ]
+    total_kw = sum(v["p_kw"] for v in inv)
+    return f"""<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>*{{margin:0;padding:0}}body{{background:#050b10;overflow:hidden;font-family:monospace}}</style>
+</head><body>
+<svg viewBox="0 0 1000 560" style="width:100%;height:560px;background:#050b10">
+  <!-- Title -->
+  <rect x="0" y="0" width="1000" height="34" fill="#080f14"/>
+  <text x="500" y="22" fill="#FDD835" font-size="12" text-anchor="middle" font-weight="bold" font-family="monospace">
+    CENTROSUR · DIAGRAMA FV — SISTEMA 47 kWp · Generación actual: {total_kw:.2f} kW
+  </text>
+
+  <!-- Left strings (INV-01) -->
+  <!-- String 1A -->
+  <!-- Solar panels row (3 panels icon) -->
+  <rect x="60" y="44" width="160" height="60" rx="4" fill="rgba(20,40,20,.8)" stroke="#4CAF50" stroke-width="1.5"/>
+  <text x="140" y="62" fill="#FDD835" font-size="9" text-anchor="middle">String 1A  12×250W</text>
+  <text x="140" y="76" fill="white" font-size="9" text-anchor="middle">U:{strings[0]["vdc"]:.0f}V  I:{strings[0]["idc"]:.2f}A</text>
+  <text x="140" y="90" fill="#90a4ae" font-size="8" text-anchor="middle">11.5 kWp</text>
+  <!-- String 1B -->
+  <rect x="60" y="120" width="160" height="60" rx="4" fill="rgba(20,40,20,.8)" stroke="#4CAF50" stroke-width="1.5"/>
+  <text x="140" y="138" fill="#FDD835" font-size="9" text-anchor="middle">String 1B  12×250W</text>
+  <text x="140" y="152" fill="white" font-size="9" text-anchor="middle">U:{strings[1]["vdc"]:.0f}V  I:{strings[1]["idc"]:.2f}A</text>
+  <text x="140" y="166" fill="#90a4ae" font-size="8" text-anchor="middle">11.5 kWp</text>
+
+  <!-- Lines to INV-01 -->
+  <line x1="220" y1="74" x2="310" y2="250" stroke="#FDD835" stroke-width="1.8" stroke-dasharray="6,3"/>
+  <line x1="220" y1="150" x2="310" y2="250" stroke="#FDD835" stroke-width="1.8" stroke-dasharray="6,3"/>
+  <text x="140" y="110" fill="#FF9800" font-size="8" text-anchor="middle">Total: 23 kWp</text>
+
+  <!-- Right strings (INV-02) -->
+  <rect x="770" y="44" width="160" height="60" rx="4" fill="rgba(20,40,20,.8)" stroke="#4CAF50" stroke-width="1.5"/>
+  <text x="850" y="62" fill="#FDD835" font-size="9" text-anchor="middle">String 2A  12×250W</text>
+  <text x="850" y="76" fill="white" font-size="9" text-anchor="middle">U:{strings[2]["vdc"]:.0f}V  I:{strings[2]["idc"]:.2f}A</text>
+  <text x="850" y="90" fill="#90a4ae" font-size="8" text-anchor="middle">11.5 kWp</text>
+  <rect x="770" y="120" width="160" height="60" rx="4" fill="rgba(20,40,20,.8)" stroke="#4CAF50" stroke-width="1.5"/>
+  <text x="850" y="138" fill="#FDD835" font-size="9" text-anchor="middle">String 2B  12×250W</text>
+  <text x="850" y="152" fill="white" font-size="9" text-anchor="middle">U:{strings[3]["vdc"]:.0f}V  I:{strings[3]["idc"]:.2f}A</text>
+  <text x="850" y="166" fill="#90a4ae" font-size="8" text-anchor="middle">11.5 kWp</text>
+  <line x1="770" y1="74" x2="690" y2="250" stroke="#FDD835" stroke-width="1.8" stroke-dasharray="6,3"/>
+  <line x1="770" y1="150" x2="690" y2="250" stroke="#FDD835" stroke-width="1.8" stroke-dasharray="6,3"/>
+  <text x="850" y="110" fill="#FF9800" font-size="8" text-anchor="middle">Total: 24 kWp</text>
+
+  <!-- Inverter 1 -->
+  <rect x="250" y="218" width="175" height="115" rx="5" fill="rgba(30,18,0,.9)" stroke="#FF9800" stroke-width="2"/>
+  <text x="337" y="236" fill="#FF9800" font-size="10" text-anchor="middle" font-weight="bold">1# Inversor</text>
+  <text x="337" y="249" fill="#90a4ae" font-size="8" text-anchor="middle">{inv[0]["brand"]} {inv[0]["model"]}</text>
+  <text x="258" y="263" fill="#90a4ae" font-size="8">Ua:{inv[0]["ua"]:.1f}V  Ub:{inv[0]["ub"]:.1f}V</text>
+  <text x="258" y="276" fill="#FF9800" font-size="8">Uc:<tspan fill="white">{inv[0]["uc"]:.1f}V</tspan></text>
+  <text x="258" y="289" fill="#90a4ae" font-size="8">Ia:{inv[0]["ia"]:.2f}A  Ib:{inv[0]["ib"]:.2f}A  Ic:{inv[0]["ic"]:.2f}A</text>
+  <text x="258" y="302" fill="#90a4ae" font-size="8">P_ac: <tspan fill="#4CAF50">{inv[0]["p_kw"]:.2f} kW</tspan>   Hz: {inv[0]["hz"]:.1f}</text>
+  <text x="258" y="315" fill="#546e7a" font-size="7.5">Máx DC: {inv[0]["pmax_dc"]}kW  Máx AC: {inv[0]["pmax_ac"]}kW</text>
+
+  <!-- Inverter 2 -->
+  <rect x="575" y="218" width="175" height="115" rx="5" fill="rgba(30,18,0,.9)" stroke="#FF9800" stroke-width="2"/>
+  <text x="662" y="236" fill="#FF9800" font-size="10" text-anchor="middle" font-weight="bold">2# Inversor</text>
+  <text x="662" y="249" fill="#90a4ae" font-size="8" text-anchor="middle">{inv[1]["brand"]} {inv[1]["model"]}</text>
+  <text x="583" y="263" fill="#90a4ae" font-size="8">Ua:{inv[1]["ua"]:.1f}V  Ub:{inv[1]["ub"]:.1f}V</text>
+  <text x="583" y="276" fill="#FF9800" font-size="8">Uc:<tspan fill="white">{inv[1]["uc"]:.1f}V</tspan></text>
+  <text x="583" y="289" fill="#90a4ae" font-size="8">Ia:{inv[1]["ia"]:.2f}A  Ib:{inv[1]["ib"]:.2f}A  Ic:{inv[1]["ic"]:.2f}A</text>
+  <text x="583" y="302" fill="#90a4ae" font-size="8">P_ac: <tspan fill="#4CAF50">{inv[1]["p_kw"]:.2f} kW</tspan>   Hz: {inv[1]["hz"]:.1f}</text>
+  <text x="583" y="315" fill="#546e7a" font-size="7.5">Máx DC: {inv[1]["pmax_dc"]}kW  Máx AC: {inv[1]["pmax_ac"]}kW</text>
+
+  <!-- AC wires inverter → AC bus box -->
+  <line x1="337" y1="333" x2="337" y2="390" stroke="#FF9800" stroke-width="2"/>
+  <line x1="662" y1="333" x2="662" y2="390" stroke="#FF9800" stroke-width="2"/>
+  <line x1="337" y1="390" x2="662" y2="390" stroke="#FF9800" stroke-width="2.5"/>
+  <line x1="500" y1="390" x2="500" y2="410" stroke="#FF9800" stroke-width="2"/>
+
+  <!-- AC Bus Box -->
+  <rect x="438" y="408" width="124" height="38" rx="4" fill="rgba(30,18,0,.85)" stroke="#FF9800" stroke-width="1.8"/>
+  <text x="500" y="422" fill="#FDD835" font-size="9" text-anchor="middle" font-weight="bold">Caja AC Bus</text>
+  <text x="500" y="438" fill="#90a4ae" font-size="8" text-anchor="middle">P total: {total_kw:.2f} kW</text>
+  <line x1="500" y1="446" x2="500" y2="476" stroke="#FF9800" stroke-width="2"/>
+
+  <!-- Medidor / Grid tie -->
+  <rect x="456" y="474" width="88" height="32" rx="3" fill="rgba(10,25,10,.85)" stroke="#4CAF50" stroke-width="1.5"/>
+  <text x="500" y="488" fill="#4CAF50" font-size="8.5" text-anchor="middle" font-weight="bold">⚡ MEDIDOR</text>
+  <text x="500" y="500" fill="#90a4ae" font-size="7.5" text-anchor="middle">10kV / Baja tensión</text>
+  <line x1="500" y1="506" x2="500" y2="530" stroke="#4CAF50" stroke-width="2"/>
+
+  <!-- Grid symbol -->
+  <line x1="460" y1="530" x2="540" y2="530" stroke="#4CAF50" stroke-width="2.5"/>
+  <line x1="468" y1="538" x2="532" y2="538" stroke="#4CAF50" stroke-width="2"/>
+  <line x1="478" y1="546" x2="522" y2="546" stroke="#4CAF50" stroke-width="1.5"/>
+  <line x1="490" y1="554" x2="510" y2="554" stroke="#4CAF50" stroke-width="1"/>
+  <text x="500" y="530" fill="#4CAF50" font-size="8" text-anchor="middle">RED</text>
+</svg>
+</body></html>"""
+
 # ─── SIDEBAR ──────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown(f"""
@@ -513,6 +762,7 @@ with st.sidebar:
     pagina = st.radio("Navegación", [
         "🏠  Inicio",
         "🏭  Sala 3D · Equipos",
+        "🔲  Diagrama Unifilar",
         "⚡  Monitoreo UPS",
         "🔋  Monitoreo Generadores",
         "❄️  Monitoreo A/C",
@@ -1447,6 +1697,12 @@ elif pagina == "📈  Análisis Energético":
 # ══════════════════════════════════════════════════════════════════════════════
 # PÁGINA: SOLAR FV
 # ══════════════════════════════════════════════════════════════════════════════
+elif pagina == "🔲  Diagrama Unifilar":
+    st.markdown("### Diagrama Unifilar — Subestación 15 kV")
+    st.caption("Valores en tiempo real · interruptores · TC · estados de celda")
+    tick_u = int(time.time() // 8)
+    components.html(unifilar_html(tick_u), height=650, scrolling=False)
+
 elif pagina == "☀️  Solar FV":
     st.markdown("### Monitoreo Solar Fotovoltaico — Sistema FV 130 kWp")
 
@@ -1506,6 +1762,11 @@ elif pagina == "☀️  Solar FV":
                              yaxis=dict(gridcolor="#1e2d3e",title="kWh"))
         st.plotly_chart(fig_gm, use_container_width=True)
 
+    st.markdown("---")
+    st.markdown("#### Diagrama de Strings — Conexión FV → Inversores → Red")
+    components.html(pv_string_html(), height=565, scrolling=False)
+
+    st.markdown("---")
     with col_s2:
         st.markdown("#### Estado de inversores")
         for inv_name, iv in EQUIPOS_SOLAR.items():
