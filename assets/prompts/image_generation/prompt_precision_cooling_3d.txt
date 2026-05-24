@@ -1,0 +1,25 @@
+PROMPT — Sistema de Enfriamiento de Precisión CRAC/CRAH (vista 3D)
+===================================================================
+Generar con: Midjourney v6 / DALL-E 3 / Stable Diffusion XL
+
+DESCRIPCIÓN:
+Photorealistic 3D render of precision cooling units (CRAC and CRAH) in a data center.
+Two Vertiv Liebert DS CRAC units (white/light gray, front-discharge) positioned at room perimeter.
+Two APC InRow CRAH units integrated between server racks — slim vertical units with blue vents.
+Visible: digital control panels with temperature/humidity readings, supply/return air ducts,
+refrigerant piping with insulation, condensate drain lines. Raised floor with perforated tiles
+directing cold air toward equipment. Cold-aisle containment visible.
+Room temperature and humidity sensors on walls and ceiling. LED status indicators: all green.
+
+ESTILO:
+- Fotorrealismo técnico / render arquitectónico industrial
+- Paleta: blanco, gris claro, acentos azul eléctrico (vents/airflow visualization)
+- Vista: perspectiva frontal/lateral mostrando CRAC + CRAH
+- Iluminación: LED blanca + indicadores azules de flujo de aire
+- Resolución objetivo: 1920×1080 px mínimo
+- Mostrar flechas de flujo de aire fría (azul) y caliente (rojo) si posible
+
+PALABRAS CLAVE (para Midjourney):
+photorealistic precision cooling, CRAC unit, CRAH in-row cooling, Vertiv Liebert DS,
+APC InRow, data center cooling, cold aisle containment, raised floor, airflow management,
+white industrial cabinets, blue LED vents, 8k, hyperrealistic, --ar 16:9 --v 6

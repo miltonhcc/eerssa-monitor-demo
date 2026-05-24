@@ -1,0 +1,25 @@
+PROMPT — Sala UPS y Baterías (vista 3D)
+=========================================
+Generar con: Midjourney v6 / DALL-E 3 / Stable Diffusion XL
+
+DESCRIPCIÓN:
+Photorealistic 3D render of a UPS and battery room in a mission-critical data center.
+Three large modular UPS units (80 kVA + 40 kVA) — white/light-gray industrial enclosures,
+with front-panel LCD displays showing green status indicators. LED indicators on.
+Adjacent: sealed valve-regulated lead-acid (VRLA) battery cabinets — black metal,
+stacked battery modules visible through mesh panels. Battery monitoring sensors attached.
+Room: polished concrete floor, white painted walls, overhead fluorescent + emergency lighting.
+Electrical conduit on walls, cable management. Temperature sensors and smoke detectors visible.
+
+ESTILO:
+- Fotorrealismo técnico industrial
+- Paleta: blanco, gris oscuro, negro, detalles verdes (LED OK)
+- Vista: perspectiva frontal/3 cuartos mostrando ambos equipos
+- Iluminación: fluorescente blanca + LEDs de equipo
+- Resolución objetivo: 1920×1080 px mínimo
+- Sin personas
+
+PALABRAS CLAVE (para Midjourney):
+photorealistic UPS room, battery cabinet, VRLA batteries, modular UPS system,
+80 kVA UPS, industrial electrical room, white metal cabinets, green status LED,
+mission critical, 8k, hyperrealistic, technical render, --ar 16:9 --v 6

@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+env/
+.env
+.venv/
+ENV/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs / temp
+*.log
+*.tmp
+
+# Large binary assets (imágenes 3D generadas — se agregan manualmente)
+assets/images/3d/**/*.png
+assets/images/3d/**/*.jpg
+assets/images/3d/**/*.jpeg
+assets/images/3d/**/*.webp
+# Mantener estructura de carpetas vía .gitkeep:
+!assets/images/3d/**/.gitkeep

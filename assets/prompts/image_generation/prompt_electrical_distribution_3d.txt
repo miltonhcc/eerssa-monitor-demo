@@ -1,0 +1,26 @@
+PROMPT — Sala de Distribución Eléctrica MV/BT (vista 3D)
+==========================================================
+Generar con: Midjourney v6 / DALL-E 3 / Stable Diffusion XL
+
+DESCRIPCIÓN:
+Photorealistic 3D render of a medium-voltage and low-voltage electrical distribution room.
+KYN28 metal-clad switchgear panels (15 kV) — white/light-gray cabinets with red accent stripe,
+arranged in a row of 6 cells. Each cell with front-access doors, pressure relief vents, and
+nameplate labels. Adjacent: dry-type distribution transformers (1000 kVA, epoxy resin, visible
+windings) on concrete pads with vibration isolators. Low-voltage distribution board (LVDB) —
+gray/beige industrial panel with circuit breakers visible through glass door.
+Floor: polished concrete with anti-static paint, safety demarcation lines (yellow).
+Overhead: cable ladder trays, LED explosion-proof luminaires.
+
+ESTILO:
+- Fotorrealismo técnico eléctrico industrial
+- Paleta: blanco, gris, franja roja (KYN28), amarillo (señalización)
+- Vista: isométrica/3 cuartos mostrando celdas + transformadores
+- Iluminación: LED industrial + luz natural (si hay ventanas)
+- Resolución objetivo: 1920×1080 px mínimo
+- Señalización IEC visible (peligro eléctrico, alta tensión)
+
+PALABRAS CLAVE (para Midjourney):
+photorealistic electrical switchgear room, KYN28 metal clad switchgear, 15kV,
+medium voltage cells, dry type transformer, LVDB panel, white cabinets, red stripe,
+industrial electrical substation, concrete floor, 8k, hyperrealistic, --ar 16:9 --v 6

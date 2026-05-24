@@ -1,0 +1,26 @@
+PROMPT — Sala de Generadores ELETRIOS (vista 3D)
+==================================================
+Generar con: Midjourney v6 / DALL-E 3 / Stable Diffusion XL
+
+DESCRIPCIÓN:
+Photorealistic 3D render of a diesel generator room with ELETRIOS brand generators.
+Two large industrial diesel generators (500 kVA each) on vibration-isolated concrete pads.
+Generators: green-gray industrial paint with ELETRIOS brand markings, visible radiator,
+turbocharger, exhaust manifold, and large fuel day-tank. Control panels with digital displays.
+Room: reinforced concrete walls, epoxy floor, acoustic insulation panels on ceiling.
+Exhaust pipes routed to exterior. Fire suppression heads visible on ceiling.
+Automatic Transfer Switch (ATS) panel on wall. Fuel management panel with level gauges.
+Overhead: industrial LED high-bay lighting. Ventilation louvers on walls.
+
+ESTILO:
+- Fotorrealismo técnico industrial pesado
+- Paleta: verde-gris industrial, concreto, metal, detalles naranja/amarillo (señalización)
+- Vista: isométrica / 3 cuartos mostrando ambos generadores
+- Iluminación: LED industrial alta intensidad
+- Resolución objetivo: 1920×1080 px mínimo
+- Sin personas, señalización de seguridad visible (PELIGRO, DIESEL)
+
+PALABRAS CLAVE (para Midjourney):
+photorealistic diesel generator room, 500 kVA industrial generator, ELETRIOS,
+concrete floor, acoustic insulation, ATS panel, fuel day tank, industrial lighting,
+mission critical backup power, 8k, hyperrealistic, --ar 16:9 --v 6

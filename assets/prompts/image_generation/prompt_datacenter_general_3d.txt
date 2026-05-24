@@ -1,0 +1,25 @@
+PROMPT — Sala de Data Center General (vista 3D isométrica)
+=============================================================
+Generar con: Midjourney v6 / DALL-E 3 / Stable Diffusion XL
+
+DESCRIPCIÓN:
+Photorealistic isometric 3D render of a high-availability Tier-IV class data center interior.
+White and light-gray server racks arranged in hot-aisle/cold-aisle configuration.
+Raised floor (raised access floor tiles visible), industrial drop ceiling with LED strip lighting.
+Blue ambient lighting, cold-aisle containment with transparent blue acrylic panels.
+In the background: UPS cabinets (black/charcoal), precision cooling CRAC units (white with blue vents).
+Cable management trays above racks with colored structured cabling.
+All equipment powered on — green LEDs on all units. Clean, modern, no clutter.
+
+ESTILO:
+- Fotorrealismo industrial / render arquitectónico
+- Paleta: blanco, gris claro, acentos azul eléctrico (#26C6DA)
+- Iluminación: LED blanca fría + tiras LED azules en pasillos
+- Vista: isométrica 3/4 desde esquina superior izquierda
+- Resolución objetivo: 1920×1080 px mínimo
+- Sin personas, sin objetos decorativos innecesarios
+
+PALABRAS CLAVE (para Midjourney):
+photorealistic data center interior, isometric view, server racks, hot aisle cold aisle,
+raised floor, precision cooling, UPS cabinets, blue LED lighting, white cabinets,
+high availability infrastructure, 8k, hyperrealistic, professional, --ar 16:9 --v 6

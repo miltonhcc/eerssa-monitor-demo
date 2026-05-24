@@ -344,6 +344,79 @@ BATERIAS = {
     "Banco Baterías C": {"soc":35,"soh":78,"v":46.5,"i":  0.0,"t_cel":26.5,"ciclos":412,"cap_kwh": 60,"estado":"standby"},
 }
 
+# ─── DATOS: GENERADORES ELETRIOS / AIRES PRECISIÓN / CONTRAINCENDIOS ──────────
+GENERADORES_ELETRIOS = {
+    "GEN-ELETRIOS-01  500 kVA": {
+        "modelo":"ELETRIOS ETG-500","kva":500,"rpm":1500,"v":220.0,"hz":60.0,"fp":0.82,
+        "t_aceite":72.4,"t_agua":68.2,"combustible_pct":78,"horas":1842,"p_kw":0.0,
+        "estado":"standby","color":"#66BB6A",
+    },
+    "GEN-ELETRIOS-02  500 kVA": {
+        "modelo":"ELETRIOS ETG-500","kva":500,"rpm":1500,"v":220.0,"hz":60.0,"fp":0.82,
+        "t_aceite":71.8,"t_agua":67.5,"combustible_pct":85,"horas":1124,"p_kw":0.0,
+        "estado":"standby","color":"#A5D6A7",
+    },
+    "GEN-ELETRIOS-03  250 kVA": {
+        "modelo":"ELETRIOS ETG-250","kva":250,"rpm":1500,"v":220.0,"hz":60.0,"fp":0.82,
+        "t_aceite":45.2,"t_agua":43.1,"combustible_pct":92,"horas":512,"p_kw":0.0,
+        "estado":"standby","color":"#C8E6C9",
+    },
+}
+
+AIRES_PRECISION = {
+    "CRAC-01  Liebert DS 30kW": {
+        "tipo":"CRAC","marca":"Vertiv Liebert","modelo":"DS 30kW",
+        "t_ret":24.8,"t_sup":18.2,"t_set":18.0,"hum":48.5,"hum_set":50.0,
+        "flujo_cfm":3200,"p_kw":9.8,"cop":3.06,
+        "estado":"online","modo":"Enfriamiento","color":TEAL_L,
+    },
+    "CRAC-02  Liebert DS 30kW": {
+        "tipo":"CRAC","marca":"Vertiv Liebert","modelo":"DS 30kW",
+        "t_ret":24.5,"t_sup":18.0,"t_set":18.0,"hum":50.2,"hum_set":50.0,
+        "flujo_cfm":3150,"p_kw":9.5,"cop":3.16,
+        "estado":"online","modo":"Enfriamiento","color":TEAL,
+    },
+    "CRAH-01  APC InRow 15kW": {
+        "tipo":"CRAH","marca":"APC by Schneider","modelo":"InRow RC 15kW",
+        "t_ret":35.2,"t_sup":18.5,"t_set":18.0,"hum":45.0,"hum_set":50.0,
+        "flujo_cfm":1800,"p_kw":5.2,"cop":2.88,
+        "estado":"online","modo":"Enfriamiento","color":"#26C6DA",
+    },
+    "CRAH-02  APC InRow 15kW": {
+        "tipo":"CRAH","marca":"APC by Schneider","modelo":"InRow RC 15kW",
+        "t_ret":35.0,"t_sup":18.8,"t_set":18.0,"hum":47.0,"hum_set":50.0,
+        "flujo_cfm":1750,"p_kw":5.0,"cop":3.0,
+        "estado":"standby","modo":"Standby","color":"#607d8b",
+    },
+}
+
+CONTRAINCENDIOS = {
+    "Zona A — Sala Servidores": {
+        "agente":"FM-200 (HFC-227ea)","cilindros":2,"carga_kg":45.0,
+        "presion_bar":42.1,"detector_humo":False,"detector_calor":False,
+        "activado":False,"ultimo_test":"2026-04-15","proximo_test":"2026-10-15",
+        "estado":"LISTO","color":"#4CAF50",
+    },
+    "Zona B — Sala UPS": {
+        "agente":"FM-200 (HFC-227ea)","cilindros":1,"carga_kg":22.5,
+        "presion_bar":41.8,"detector_humo":False,"detector_calor":False,
+        "activado":False,"ultimo_test":"2026-04-15","proximo_test":"2026-10-15",
+        "estado":"LISTO","color":"#4CAF50",
+    },
+    "Zona C — Sala Generadores": {
+        "agente":"FM-200 (HFC-227ea)","cilindros":1,"carga_kg":22.5,
+        "presion_bar":40.5,"detector_humo":False,"detector_calor":False,
+        "activado":False,"ultimo_test":"2026-03-20","proximo_test":"2026-09-20",
+        "estado":"LISTO","color":"#4CAF50",
+    },
+    "Zona D — Sala Media Tensión": {
+        "agente":"Novec 1230 (FK-5-1-12)","cilindros":1,"carga_kg":18.0,
+        "presion_bar":38.2,"detector_humo":False,"detector_calor":False,
+        "activado":False,"ultimo_test":"2026-02-10","proximo_test":"2026-08-10",
+        "estado":"ADVERTENCIA","color":"#FF9800",
+    },
+}
+
 # ─── FUNCIÓN: SALA 3D CON THREE.JS ────────────────────────────────────────────
 def sala_3d_html(tick, height=500):
     statuses = {}
@@ -770,6 +843,9 @@ with st.sidebar:
         "🌡️  Ambiente & Sensores",
         "📈  Análisis Energético",
         "☀️  Solar FV",
+        "⛽  Generadores ELETRIOS",
+        "🧊  Aires de Precisión",
+        "🔥  Contraincendios",
         "🔔  Gestión de Alarmas",
         "📊  Reporte de Parámetros",
         "📋  Trazabilidad Incidentes",
@@ -1509,44 +1585,54 @@ elif pagina == "🌡️  Ambiente & Sensores":
 
     rng_amb = np.random.default_rng(int(time.time()//30))
 
-    # Tarjetas de sensores
-    sens_cols = st.columns(3)
-    for i, (sala, s) in enumerate(SENSORES_AMB.items()):
-        col_s = sens_cols[i % 3]
+    # Generar tarjetas como HTML puro (evita bug de indentación en st.markdown)
+    cards_html = []
+    for sala, s in SENSORES_AMB.items():
         if s["temp"] is None:
-            status_s = "⚠️ ALARMA" if s["smoke"] or s["water"] else "✓ NORMAL"
-            border_c = "#f44336" if s["smoke"] or s["water"] else "#4CAF50"
-            body_html = f"""
-              <div style="text-align:center;padding:6px 0;">
-                <div style="font-size:1.6rem;">{'🔥' if s['smoke'] else '💧' if s['water'] else '✅'}</div>
-                <div style="color:{border_c};font-size:1rem;font-weight:700;margin-top:4px;">{status_s}</div>
-                <div style="color:#546e7a;font-size:0.72rem;margin-top:2px;">{'Detector humo/agua' if 'Bajo' in sala else 'Detector humo'}</div>
-              </div>"""
+            alarm  = s["smoke"] or s["water"]
+            bc     = "#f44336" if alarm else "#4CAF50"
+            icon   = "🔥" if s["smoke"] else "💧" if s["water"] else "✅"
+            label  = "⚠️ ALARMA" if alarm else "✓ NORMAL"
+            sub    = "Detector humo/agua" if "Bajo" in sala else "Detector humo"
+            inner  = (f'<div style="text-align:center;padding:6px 0">'
+                      f'<div style="font-size:1.6rem">{icon}</div>'
+                      f'<div style="color:{bc};font-size:1rem;font-weight:700;margin-top:4px">{label}</div>'
+                      f'<div style="color:#546e7a;font-size:0.72rem;margin-top:2px">{sub}</div>'
+                      f'</div>')
         else:
-            t_now = s["temp"] + float(rng_amb.uniform(-.4,.4))
-            h_now = s["hum"]  + float(rng_amb.uniform(-.8,.8))
-            t_c   = "#f44336" if t_now >= s["lim_t"] else "#FF9800" if t_now >= s["lim_t"]-2 else "#4CAF50"
-            h_c   = "#FF9800" if h_now >= s["lim_h"] else "#4CAF50"
-            border_c = "#f44336" if t_now>=s["lim_t"] or h_now>=s["lim_h"] else "#FF9800" if t_now>=s["lim_t"]-2 else "#4CAF50"
-            body_html = f"""
-              <div style="display:flex;justify-content:space-around;padding:6px 0;">
-                <div style="text-align:center;">
-                  <div style="font-size:1.4rem;">🌡️</div>
-                  <div style="color:{t_c};font-size:1.15rem;font-weight:700;">{t_now:.1f}°C</div>
-                  <div style="color:#546e7a;font-size:0.7rem;">Lím {s['lim_t']}°C</div>
-                </div>
-                <div style="text-align:center;">
-                  <div style="font-size:1.4rem;">💧</div>
-                  <div style="color:{h_c};font-size:1.15rem;font-weight:700;">{h_now:.0f}%</div>
-                  <div style="color:#546e7a;font-size:0.7rem;">Lím {s['lim_h']}%</div>
-                </div>
-              </div>"""
-        col_s.markdown(f"""
-        <div style="background:#111827;border-radius:10px;padding:10px 12px;margin-bottom:10px;
-             border:1px solid {border_c}44;border-top:3px solid {border_c};">
-          <div style="color:white;font-size:0.78rem;font-weight:600;margin-bottom:4px;">📍 {sala}</div>
-          {body_html}
-        </div>""", unsafe_allow_html=True)
+            t_now  = s["temp"] + float(rng_amb.uniform(-.4,.4))
+            h_now  = s["hum"]  + float(rng_amb.uniform(-.8,.8))
+            t_c    = "#f44336" if t_now >= s["lim_t"] else "#FF9800" if t_now >= s["lim_t"]-2 else "#4CAF50"
+            h_c    = "#FF9800" if h_now >= s["lim_h"] else "#4CAF50"
+            bc     = "#f44336" if t_now>=s["lim_t"] or h_now>=s["lim_h"] else "#FF9800" if t_now>=s["lim_t"]-2 else "#4CAF50"
+            inner  = (f'<div style="display:flex;justify-content:space-around;padding:6px 0">'
+                      f'<div style="text-align:center">'
+                      f'<div style="font-size:1.4rem">🌡️</div>'
+                      f'<div style="color:{t_c};font-size:1.15rem;font-weight:700">{t_now:.1f}°C</div>'
+                      f'<div style="color:#546e7a;font-size:0.7rem">Lím {s["lim_t"]}°C</div>'
+                      f'</div>'
+                      f'<div style="text-align:center">'
+                      f'<div style="font-size:1.4rem">💧</div>'
+                      f'<div style="color:{h_c};font-size:1.15rem;font-weight:700">{h_now:.0f}%</div>'
+                      f'<div style="color:#546e7a;font-size:0.7rem">Lím {s["lim_h"]}%</div>'
+                      f'</div></div>')
+        cards_html.append(
+            f'<div style="background:#111827;border-radius:10px;padding:10px 12px;'
+            f'border:1px solid {bc}44;border-top:3px solid {bc};flex:1;min-width:220px">'
+            f'<div style="color:white;font-size:0.78rem;font-weight:600;margin-bottom:4px">📍 {sala}</div>'
+            f'{inner}</div>'
+        )
+
+    row1 = "".join(cards_html[:3])
+    row2 = "".join(cards_html[3:])
+    grid_html = (
+        f'<div style="display:flex;gap:10px;margin-bottom:10px;font-family:sans-serif">{row1}</div>'
+        f'<div style="display:flex;gap:10px;font-family:sans-serif">{row2}</div>'
+    )
+    components.html(
+        f'<div style="background:#0a0e1a;padding:4px">{grid_html}</div>',
+        height=260, scrolling=False
+    )
 
     st.markdown("---")
     st.markdown("#### Tendencia de temperatura — últimas 24 h (°C)")
@@ -1808,4 +1894,355 @@ elif pagina == "☀️  Solar FV":
                 <span style="color:#90a4ae;">{bv['v']:.1f} V &nbsp; {bv['i']:+.1f} A</span>
                 <span style="color:{est_c};">{bv['estado'].upper()}</span>
               </div>
+            </div>""", unsafe_allow_html=True)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PÁGINA: GENERADORES ELETRIOS
+# ══════════════════════════════════════════════════════════════════════════════
+elif pagina == "⛽  Generadores ELETRIOS":
+    st.markdown("### Generadores ELETRIOS — Grupo Electrógeno de Respaldo")
+    st.caption("Configuración N+1 · 2×500 kVA + 1×250 kVA · Arranque automático ≤10 s")
+    st.markdown(f"""
+    <div class="lux-card" style="margin-bottom:0.8rem;">
+      <p style="color:#b0bec5;line-height:1.8;margin:0;font-size:0.9rem;">
+        Infraestructura diseñada bajo <b style="color:{TEAL_L};">criterios de alta disponibilidad,
+        redundancia y continuidad operativa asociados a un nivel Tier IV</b>.
+        Los grupos electrógenos ELETRIOS operan en configuración <b>N+1</b> con
+        arranque automático ≤ 10 segundos ante corte de red, transferencia via ATS.
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    rng_g = np.random.default_rng(int(time.time() // 30))
+
+    kva_total = sum(v["kva"] for v in GENERADORES_ELETRIOS.values())
+    gen_on    = sum(1 for v in GENERADORES_ELETRIOS.values() if v["estado"]=="online")
+    gen_stby  = sum(1 for v in GENERADORES_ELETRIOS.values() if v["estado"]=="standby")
+    comb_avg  = sum(v["combustible_pct"] for v in GENERADORES_ELETRIOS.values()) / len(GENERADORES_ELETRIOS)
+
+    c1g,c2g,c3g,c4g = st.columns(4)
+    c1g.metric("Capacidad total",       f"{kva_total} kVA")
+    c2g.metric("En operación",          f"{gen_on} unidades")
+    c3g.metric("Standby listo",         f"{gen_stby} unidades")
+    c4g.metric("Combustible promedio",  f"{comb_avg:.0f}%")
+
+    st.markdown("---")
+    col_g1, col_g2 = st.columns([1.2, 1])
+
+    with col_g1:
+        st.markdown("#### Estado de unidades ELETRIOS")
+        for gen_name, gv in GENERADORES_ELETRIOS.items():
+            t_noise   = float(rng_g.uniform(-.6, .6))
+            t_now_ac  = gv["t_aceite"] + t_noise
+            t_now_ag  = gv["t_agua"]   + float(rng_g.uniform(-.4, .4))
+            comb_now  = gv["combustible_pct"] + float(rng_g.uniform(-.3, .3))
+            est_c = "#4CAF50" if gv["estado"]=="online" else "#26C6DA" if gv["estado"]=="standby" else "#607d8b"
+            icon  = "🟢" if gv["estado"]=="online" else "🔵" if gv["estado"]=="standby" else "🔴"
+            t_ac_c = "#f44336" if t_now_ac>85 else "#FF9800" if t_now_ac>75 else "#4CAF50"
+            fuel_c = "#f44336" if comb_now<20 else "#FF9800" if comb_now<35 else "#4CAF50"
+            st.markdown(f"""
+            <div style="background:#111827;border-radius:10px;padding:14px 16px;margin-bottom:10px;
+                 border-left:4px solid {est_c};">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="color:{est_c};font-weight:700;font-size:1rem;">{icon} {gen_name}</span>
+                <span style="background:{est_c}22;color:{est_c};padding:2px 10px;border-radius:20px;
+                      font-size:0.75rem;font-weight:600;">{gv['estado'].upper()}</span>
+              </div>
+              <div style="color:#546e7a;font-size:0.78rem;margin:4px 0 8px;">{gv['modelo']} · {gv['kva']} kVA · {gv['rpm']} RPM</div>
+              <div style="display:flex;gap:1.2rem;flex-wrap:wrap;font-size:0.82rem;">
+                <div><span style="color:#90a4ae;">T° Aceite</span><br>
+                     <span style="color:{t_ac_c};font-weight:700;">{t_now_ac:.1f}°C</span></div>
+                <div><span style="color:#90a4ae;">T° Agua</span><br>
+                     <span style="color:{TEAL_L};font-weight:700;">{t_now_ag:.1f}°C</span></div>
+                <div><span style="color:#90a4ae;">Combustible</span><br>
+                     <span style="color:{fuel_c};font-weight:700;">{comb_now:.0f}%</span></div>
+                <div><span style="color:#90a4ae;">Horas op.</span><br>
+                     <span style="color:white;font-weight:600;">{gv['horas']} h</span></div>
+                <div><span style="color:#90a4ae;">Tensión</span><br>
+                     <span style="color:white;font-weight:600;">{gv['v']:.0f} V</span></div>
+                <div><span style="color:#90a4ae;">Frecuencia</span><br>
+                     <span style="color:white;font-weight:600;">{gv['hz']:.1f} Hz</span></div>
+              </div>
+              <div style="background:#0d1520;border-radius:4px;height:6px;margin-top:10px;overflow:hidden;">
+                <div style="background:{fuel_c};width:{comb_now:.0f}%;height:100%;border-radius:4px;"></div>
+              </div>
+            </div>""", unsafe_allow_html=True)
+
+    with col_g2:
+        st.markdown("#### Nivel de combustible — Tanques día")
+        fig_fuel = go.Figure()
+        names_g  = [n.split()[0]+"-"+n.split()[1] for n in GENERADORES_ELETRIOS]
+        combs    = [v["combustible_pct"] for v in GENERADORES_ELETRIOS.values()]
+        cols_fuel = ["#4CAF50" if c>50 else "#FF9800" if c>25 else "#f44336" for c in combs]
+        fig_fuel.add_trace(go.Bar(
+            x=names_g, y=combs,
+            marker_color=cols_fuel,
+            text=[f"{c:.0f}%" for c in combs], textposition="outside",
+            textfont=dict(color="white", size=12),
+        ))
+        fig_fuel.add_hline(y=25, line_dash="dash", line_color="#FF9800",
+                           annotation_text="Nivel mínimo 25%", annotation_font_color="#FF9800")
+        fig_fuel.update_layout(paper_bgcolor=CARD2, plot_bgcolor=CARD2, font_color="white",
+                               height=240, yaxis=dict(range=[0,110], title="(%)", gridcolor="#1e2d3e"),
+                               margin=dict(l=40,r=10,t=15,b=30))
+        st.plotly_chart(fig_fuel, use_container_width=True)
+
+        st.markdown("#### ATS — Transferencia Automática")
+        ats_items = [
+            ("ATS-01 Principal",  "Red → GEN-01/02", "#4CAF50", "NORMAL"),
+            ("ATS-02 Emergencia", "Red → GEN-03",    "#4CAF50", "NORMAL"),
+            ("ATS-03 UPS",        "Red → UPS-01",    "#4CAF50", "NORMAL"),
+        ]
+        for ats_name, ats_src, ats_c, ats_st in ats_items:
+            st.markdown(f"""
+            <div style="background:#111827;border-radius:8px;padding:8px 12px;margin-bottom:6px;
+                 border-left:3px solid {ats_c};">
+              <span style="color:{ats_c};font-weight:600;">✓ {ats_name}</span>
+              <span style="color:#607d8b;font-size:0.78rem;"> · {ats_src}</span>
+              <span style="float:right;color:{ats_c};font-size:0.78rem;font-weight:600;">{ats_st}</span>
+            </div>""", unsafe_allow_html=True)
+
+        st.markdown("#### Tendencia T° aceite — GEN-01 (24 h)")
+        t24g = pd.date_range(end=datetime.now(), periods=288, freq="5min")
+        rng_gt = np.random.default_rng(55)
+        ts_ac = 72.4 + np.cumsum(rng_gt.normal(0, 0.08, 288))
+        ts_ac = np.clip(ts_ac, 68, 80)
+        fig_tg = go.Figure(go.Scatter(x=t24g, y=ts_ac, mode="lines",
+                                      line=dict(color="#66BB6A", width=1.8),
+                                      fill="tozeroy", fillcolor="rgba(102,187,106,0.08)"))
+        fig_tg.add_hline(y=85, line_dash="dash", line_color="#FF9800",
+                         annotation_text="Lím. advertencia 85°C", annotation_font_color="#FF9800")
+        fig_tg.update_layout(paper_bgcolor=CARD2, plot_bgcolor=CARD2, font_color="white",
+                             height=200, margin=dict(l=45,r=10,t=10,b=25),
+                             xaxis=dict(showticklabels=False, gridcolor="#1e2d3e"),
+                             yaxis=dict(title="°C", gridcolor="#1e2d3e"))
+        st.plotly_chart(fig_tg, use_container_width=True)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PÁGINA: AIRES DE PRECISIÓN
+# ══════════════════════════════════════════════════════════════════════════════
+elif pagina == "🧊  Aires de Precisión":
+    st.markdown("### Aires de Precisión — Sistema CRAC/CRAH")
+    st.caption("Vertiv Liebert DS 30kW (CRAC) · APC InRow RC 15kW (CRAH) · Configuración N+1")
+    st.markdown(f"""
+    <div class="lux-card" style="margin-bottom:0.8rem;">
+      <p style="color:#b0bec5;line-height:1.8;margin:0;font-size:0.9rem;">
+        Sistema de enfriamiento de precisión diseñado bajo <b style="color:{TEAL_L};">criterios de
+        alta disponibilidad y redundancia asociados a un nivel Tier IV</b>.
+        Configuración <b>N+1</b>: 2 CRAC + 2 CRAH, con control independiente de temperatura y
+        humedad por zona. PUE objetivo ≤ 1.45.
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    rng_ac = np.random.default_rng(int(time.time() // 30))
+
+    total_kw_cool = sum(v["p_kw"] for v in AIRES_PRECISION.values() if v["estado"]=="online")
+    units_on      = sum(1 for v in AIRES_PRECISION.values() if v["estado"]=="online")
+    avg_cop       = sum(v["cop"] for v in AIRES_PRECISION.values() if v["estado"]=="online") / max(units_on, 1)
+    pue_est       = 1.0 + (total_kw_cool / max(total_kw_cool * 3.2, 1))
+
+    c1a,c2a,c3a,c4a = st.columns(4)
+    c1a.metric("Unidades activas",     f"{units_on}/{len(AIRES_PRECISION)}")
+    c1a.metric("Potencia enfriamiento",f"{total_kw_cool:.1f} kW")
+    c2a.metric("COP promedio",         f"{avg_cop:.2f}")
+    c3a.metric("PUE estimado",         f"{1.38:.2f}")
+    c4a.metric("Delta T° suministro",  "18.0 °C")
+
+    st.markdown("---")
+    col_ac1, col_ac2 = st.columns([1.1, 1])
+
+    with col_ac1:
+        st.markdown("#### Unidades de enfriamiento")
+        for ac_name, av in AIRES_PRECISION.items():
+            t_ret_now = av["t_ret"] + float(rng_ac.uniform(-.3,.3))
+            t_sup_now = av["t_sup"] + float(rng_ac.uniform(-.15,.15))
+            hum_now   = av["hum"]   + float(rng_ac.uniform(-.5,.5))
+            delta_t   = t_ret_now - t_sup_now
+            est_c  = TEAL_L if av["estado"]=="online" else "#607d8b"
+            icon   = "🟢" if av["estado"]=="online" else "⚪"
+            dt_c   = "#4CAF50" if delta_t>5 else "#FF9800" if delta_t>3 else "#f44336"
+            st.markdown(f"""
+            <div style="background:#111827;border-radius:10px;padding:14px 16px;margin-bottom:10px;
+                 border-left:4px solid {est_c};">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="color:{est_c};font-weight:700;font-size:0.95rem;">{icon} {ac_name}</span>
+                <span style="background:{est_c}22;color:{est_c};padding:2px 10px;border-radius:20px;
+                      font-size:0.73rem;font-weight:600;">{av['modo'].upper()}</span>
+              </div>
+              <div style="color:#546e7a;font-size:0.76rem;margin:3px 0 8px;">
+                {av['marca']} · {av['modelo']} · {av['tipo']}
+              </div>
+              <div style="display:flex;gap:1.2rem;flex-wrap:wrap;font-size:0.82rem;">
+                <div><span style="color:#90a4ae;">T° Retorno</span><br>
+                     <span style="color:#FF7043;font-weight:700;">{t_ret_now:.1f}°C</span></div>
+                <div><span style="color:#90a4ae;">T° Suministro</span><br>
+                     <span style="color:{TEAL_L};font-weight:700;">{t_sup_now:.1f}°C</span></div>
+                <div><span style="color:#90a4ae;">ΔT</span><br>
+                     <span style="color:{dt_c};font-weight:700;">{delta_t:.1f}°C</span></div>
+                <div><span style="color:#90a4ae;">Humedad</span><br>
+                     <span style="color:white;font-weight:600;">{hum_now:.0f}%</span></div>
+                <div><span style="color:#90a4ae;">Potencia</span><br>
+                     <span style="color:white;font-weight:600;">{av['p_kw']:.1f} kW</span></div>
+                <div><span style="color:#90a4ae;">COP</span><br>
+                     <span style="color:#4CAF50;font-weight:700;">{av['cop']:.2f}</span></div>
+              </div>
+            </div>""", unsafe_allow_html=True)
+
+    with col_ac2:
+        st.markdown("#### Temperatura de suministro vs retorno")
+        ac_names_short = ["CRAC-01","CRAC-02","CRAH-01","CRAH-02"]
+        t_sup_vals = [av["t_sup"] for av in AIRES_PRECISION.values()]
+        t_ret_vals = [av["t_ret"] for av in AIRES_PRECISION.values()]
+        fig_dt = go.Figure()
+        fig_dt.add_trace(go.Bar(name="T° Retorno", x=ac_names_short, y=t_ret_vals,
+                                marker_color="#FF7043", offsetgroup=0))
+        fig_dt.add_trace(go.Bar(name="T° Suministro", x=ac_names_short, y=t_sup_vals,
+                                marker_color=TEAL_L, offsetgroup=1))
+        fig_dt.update_layout(paper_bgcolor=CARD2, plot_bgcolor=CARD2, font_color="white",
+                             height=240, barmode="group", margin=dict(l=40,r=10,t=10,b=30),
+                             yaxis=dict(title="°C", gridcolor="#1e2d3e"),
+                             legend=dict(bgcolor=CARD2))
+        st.plotly_chart(fig_dt, use_container_width=True)
+
+        st.markdown("#### Tendencia T° Retorno — CRAC-01 (24 h)")
+        t24a = pd.date_range(end=datetime.now(), periods=288, freq="5min")
+        rng_at = np.random.default_rng(77)
+        ts_ret = 24.8 + np.cumsum(rng_at.normal(0, 0.05, 288))
+        ts_ret = np.clip(ts_ret, 22, 28)
+        fig_ta = go.Figure(go.Scatter(x=t24a, y=ts_ret, mode="lines",
+                                      line=dict(color=TEAL_L, width=1.8),
+                                      fill="tozeroy", fillcolor="rgba(38,198,218,0.07)"))
+        fig_ta.add_hline(y=27, line_dash="dash", line_color="#FF9800",
+                         annotation_text="Lím. advertencia 27°C", annotation_font_color="#FF9800")
+        fig_ta.update_layout(paper_bgcolor=CARD2, plot_bgcolor=CARD2, font_color="white",
+                             height=200, margin=dict(l=45,r=10,t=10,b=25),
+                             xaxis=dict(showticklabels=False, gridcolor="#1e2d3e"),
+                             yaxis=dict(title="°C", gridcolor="#1e2d3e"))
+        st.plotly_chart(fig_ta, use_container_width=True)
+
+        st.markdown("#### Flujo de aire (CFM)")
+        cfm_vals = [av["flujo_cfm"] for av in AIRES_PRECISION.values()]
+        fig_cfm = go.Figure(go.Bar(
+            x=ac_names_short, y=cfm_vals,
+            marker_color=[TEAL_L if av["estado"]=="online" else "#607d8b"
+                          for av in AIRES_PRECISION.values()],
+            text=[f"{c:,}" for c in cfm_vals], textposition="outside",
+            textfont=dict(color="white", size=10),
+        ))
+        fig_cfm.update_layout(paper_bgcolor=CARD2, plot_bgcolor=CARD2, font_color="white",
+                              height=180, margin=dict(l=40,r=10,t=10,b=30),
+                              yaxis=dict(title="CFM", gridcolor="#1e2d3e"))
+        st.plotly_chart(fig_cfm, use_container_width=True)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PÁGINA: CONTRAINCENDIOS
+# ══════════════════════════════════════════════════════════════════════════════
+elif pagina == "🔥  Contraincendios":
+    st.markdown("### Sistema de Supresión de Incendios — Agente Limpio")
+    st.caption("FM-200 (HFC-227ea) + Novec 1230 · Detección VESDA · 4 zonas protegidas")
+    st.markdown(f"""
+    <div class="lux-card" style="margin-bottom:0.8rem;">
+      <p style="color:#b0bec5;line-height:1.8;margin:0;font-size:0.9rem;">
+        Sistema de supresión de incendios de <b style="color:{TEAL_L};">agente limpio</b>
+        (FM-200 y Novec 1230) con detección aspirante tipo VESDA en cada zona.
+        Diseñado bajo criterios de protección para infraestructura crítica de
+        alta disponibilidad. Descarga automática ≤ 10 segundos tras confirmación
+        de alarma de dos detectores.
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    zonas_listas  = sum(1 for v in CONTRAINCENDIOS.values() if v["estado"]=="LISTO")
+    zonas_advert  = sum(1 for v in CONTRAINCENDIOS.values() if v["estado"]=="ADVERTENCIA")
+    zonas_alarma  = sum(1 for v in CONTRAINCENDIOS.values() if v["activado"])
+    cil_total     = sum(v["cilindros"] for v in CONTRAINCENDIOS.values())
+
+    c1f,c2f,c3f,c4f = st.columns(4)
+    c1f.metric("Zonas protegidas",      f"{len(CONTRAINCENDIOS)}")
+    c2f.metric("Zonas en estado LISTO", f"{zonas_listas}/{len(CONTRAINCENDIOS)}")
+    c3f.metric("Cilindros instalados",  f"{cil_total}")
+    c4f.metric("Activaciones activas",  f"{zonas_alarma}", delta_color="inverse")
+
+    st.markdown("---")
+    col_f1, col_f2 = st.columns([1.2, 1])
+
+    with col_f1:
+        st.markdown("#### Estado por zona")
+        for zona_name, zv in CONTRAINCENDIOS.items():
+            est_c  = zv["color"]
+            icon   = "✅" if zv["estado"]=="LISTO" else "⚠️" if zv["estado"]=="ADVERTENCIA" else "🔥"
+            smoke_c = "#f44336" if zv["detector_humo"] else "#4CAF50"
+            heat_c  = "#f44336" if zv["detector_calor"] else "#4CAF50"
+            pres_c  = "#f44336" if zv["presion_bar"]<38 else "#FF9800" if zv["presion_bar"]<40 else "#4CAF50"
+            st.markdown(f"""
+            <div style="background:#111827;border-radius:10px;padding:14px 16px;margin-bottom:10px;
+                 border-left:4px solid {est_c};border-top:2px solid {est_c}22;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="color:{est_c};font-weight:700;font-size:0.95rem;">{icon} {zona_name}</span>
+                <span style="background:{est_c}22;color:{est_c};padding:2px 12px;border-radius:20px;
+                      font-size:0.73rem;font-weight:700;">{zv['estado']}</span>
+              </div>
+              <div style="color:#546e7a;font-size:0.76rem;margin:4px 0 8px;">
+                Agente: <b style="color:#90a4ae;">{zv['agente']}</b>
+                · {zv['cilindros']} cilindro{'s' if zv['cilindros']>1 else ''} · {zv['carga_kg']:.1f} kg
+              </div>
+              <div style="display:flex;gap:1.4rem;flex-wrap:wrap;font-size:0.82rem;">
+                <div><span style="color:#90a4ae;">Presión</span><br>
+                     <span style="color:{pres_c};font-weight:700;">{zv['presion_bar']:.1f} bar</span></div>
+                <div><span style="color:#90a4ae;">Det. Humo</span><br>
+                     <span style="color:{smoke_c};font-weight:700;">{'ALARMA' if zv['detector_humo'] else 'NORMAL'}</span></div>
+                <div><span style="color:#90a4ae;">Det. Calor</span><br>
+                     <span style="color:{heat_c};font-weight:700;">{'ALARMA' if zv['detector_calor'] else 'NORMAL'}</span></div>
+                <div><span style="color:#90a4ae;">Último test</span><br>
+                     <span style="color:white;">{zv['ultimo_test']}</span></div>
+                <div><span style="color:#90a4ae;">Próximo test</span><br>
+                     <span style="color:{TEAL_L};">{zv['proximo_test']}</span></div>
+              </div>
+            </div>""", unsafe_allow_html=True)
+
+    with col_f2:
+        st.markdown("#### Presión de cilindros por zona")
+        zona_short  = ["Zona A", "Zona B", "Zona C", "Zona D"]
+        presiones   = [v["presion_bar"] for v in CONTRAINCENDIOS.values()]
+        cols_pres   = [v["color"] for v in CONTRAINCENDIOS.values()]
+        fig_pres = go.Figure(go.Bar(
+            x=zona_short, y=presiones,
+            marker_color=cols_pres,
+            text=[f"{p:.1f} bar" for p in presiones], textposition="outside",
+            textfont=dict(color="white", size=11),
+        ))
+        fig_pres.add_hline(y=40, line_dash="dash", line_color="#FF9800",
+                           annotation_text="Presión mínima operativa 40 bar",
+                           annotation_font_color="#FF9800")
+        fig_pres.update_layout(paper_bgcolor=CARD2, plot_bgcolor=CARD2, font_color="white",
+                               height=240, yaxis=dict(range=[0,50], title="bar", gridcolor="#1e2d3e"),
+                               margin=dict(l=40,r=10,t=15,b=30))
+        st.plotly_chart(fig_pres, use_container_width=True)
+
+        st.markdown("#### Resumen de cilindros y carga")
+        df_cil = pd.DataFrame([{
+            "Zona": zn.split("—")[0].strip(),
+            "Agente": zv["agente"].split("(")[0].strip(),
+            "Cilindros": zv["cilindros"],
+            "Carga (kg)": zv["carga_kg"],
+            "Presión (bar)": zv["presion_bar"],
+            "Estado": zv["estado"],
+        } for zn, zv in CONTRAINCENDIOS.items()])
+        st.dataframe(df_cil, hide_index=True, use_container_width=True)
+
+        st.markdown("#### Programa de mantenimiento preventivo")
+        mant_items = [
+            ("✅", "Verificación mensual detectores",  "2026-05-01", "Completado"),
+            ("✅", "Recarga cilindros Zona A/B",        "2026-04-15", "Completado"),
+            ("⚠️", "Recarga cilindros Zona D",          "2026-08-10", "Pendiente"),
+            ("🔵", "Inspección anual sistema completo", "2026-10-15", "Programado"),
+        ]
+        for ic, desc, fecha, estado in mant_items:
+            ec = "#4CAF50" if "Completado" in estado else "#FF9800" if "Pendiente" in estado else TEAL_L
+            st.markdown(f"""
+            <div style="background:#111827;border-radius:7px;padding:7px 12px;margin-bottom:5px;
+                 border-left:3px solid {ec};">
+              <span style="color:{ec};font-weight:600;">{ic} {desc}</span>
+              <span style="float:right;color:#607d8b;font-size:0.78rem;">{fecha} · {estado}</span>
             </div>""", unsafe_allow_html=True)

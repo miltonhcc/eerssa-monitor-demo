@@ -1,0 +1,29 @@
+PROMPT — Centro de Control NOC / Dashboard de Monitoreo (vista 3D)
+====================================================================
+Generar con: Midjourney v6 / DALL-E 3 / Stable Diffusion XL
+
+DESCRIPCIÓN:
+Photorealistic 3D render of a Network Operations Center (NOC) monitoring room.
+Video wall: 4×2 arrangement of large LCD screens (55") showing:
+  - Real-time electrical dashboards with gauge indicators (green/amber/red)
+  - Single-line diagrams (unifilar) of the 15kV substation
+  - Temperature heat maps of data center rooms
+  - Generator and UPS status panels with trend charts
+  - Geographic campus overview map
+Workstations: 3 operator consoles with dual-monitor setups, ergonomic chairs.
+Lighting: dark ambient with blue accent lighting, screens dominating the visual.
+Visible: rack-mounted servers/networking behind glass, alarm indicator board on wall.
+Color theme: dark navy background (#0a0e1a), teal accents (#26C6DA), data-focused.
+
+ESTILO:
+- Fotorrealismo futurista / tecnológico profesional
+- Paleta: fondo oscuro azul-marino, acentos cian/teal, pantallas dominantes
+- Vista: perspectiva frontal / ligeramente elevada mostrando toda la sala
+- Iluminación: ambiental oscura + luz de pantallas + strips LED azules
+- Resolución objetivo: 1920×1080 px mínimo
+- Sin rostros identificables en operadores (si se incluyen siluetas)
+
+PALABRAS CLAVE (para Midjourney):
+photorealistic NOC control room, video wall, monitoring dashboard, dark theme,
+teal blue accent lighting, electrical SCADA display, operator consoles, mission critical,
+network operations center, 4k screens, dark navy interior, 8k, hyperrealistic, --ar 16:9 --v 6

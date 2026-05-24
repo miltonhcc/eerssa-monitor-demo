@@ -1,0 +1,27 @@
+PROMPT — Sistema de Supresión de Incendios (agente limpio) (vista 3D)
+======================================================================
+Generar con: Midjourney v6 / DALL-E 3 / Stable Diffusion XL
+
+DESCRIPCIÓN:
+Photorealistic 3D render of a clean agent fire suppression system (FM-200/HFC-227ea)
+installed in a data center server room.
+Visible: stainless steel FM-200 storage cylinders in a dedicated cylinder cabinet (red framed,
+silver cylinders with pressure gauges showing green zone). Distribution piping (1" stainless)
+running along ceiling with ceiling-mounted discharge nozzles (chrome/stainless).
+Wall-mounted fire suppression control panel (red, with zone indicators — all green).
+Smoke detectors (VESDA-type aspirating pipe) and heat detectors on ceiling.
+Manual abort station on wall. "SUPPRESSION ARMED" indicator light (green).
+Emergency strobe/horn device visible. Clean, professional installation.
+
+ESTILO:
+- Fotorrealismo técnico / industrial
+- Paleta: rojo (paneles de control), plateado/acero (tuberías/cilindros), verde (indicadores OK)
+- Vista: perspectiva mostrando cilindros + red de distribución en techo
+- Iluminación: LED blanca + indicadores rojos/verdes
+- Resolución objetivo: 1920×1080 px mínimo
+- Sin personas, etiquetas de seguridad visibles
+
+PALABRAS CLAVE (para Midjourney):
+photorealistic fire suppression system, FM-200 clean agent, HFC-227ea cylinders,
+data center fire protection, suppression nozzles, stainless piping, VESDA detector,
+fire control panel, red cabinet, green indicators, 8k, hyperrealistic, --ar 16:9 --v 6
