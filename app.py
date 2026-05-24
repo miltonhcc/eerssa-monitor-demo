@@ -7,6 +7,8 @@ from plotly.subplots import make_subplots
 from datetime import datetime
 import time
 import io
+import json
+import streamlit.components.v1 as components
 
 # ─── PAGE CONFIG ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -309,6 +311,189 @@ INCIDENTES = [
                  "23:30 — Humedad normalizada (48%)"]},
 ]
 
+# ─── DATOS: MEDIA TENSIÓN / TRANSFORMADORES / SENSORES / SOLAR / BATERÍAS ─────
+EQUIPOS_MV = {
+    "CELDA MV-1  Entrada":      {"kv":15.0,"i_a":320,"tipo":"Entrada",    "estado":"online", "color":TEAL_L},
+    "CELDA MV-2  Protección":   {"kv":15.0,"i_a":280,"tipo":"Protección", "estado":"online", "color":TEAL},
+    "CELDA MV-3  Medición":     {"kv":15.0,"i_a":305,"tipo":"Medición",   "estado":"online", "color":TEAL},
+    "CELDA MV-4  Salida Trafo1":{"kv":15.0,"i_a":298,"tipo":"Salida",     "estado":"alarma", "color":"#FF9800"},
+    "CELDA MV-5  Salida Trafo2":{"kv":15.0,"i_a":201,"tipo":"Salida",     "estado":"online", "color":TEAL_L},
+    "CELDA MV-6  Seccionador":  {"kv":15.0,"i_a":  0,"tipo":"Seccionador","estado":"offline","color":"#607d8b"},
+}
+EQUIPOS_TRAFO = {
+    "TRAFO-01  630 kVA": {"kv_p":15.0,"kv_s":0.44,"kva":630,"t_aceite":65.2,"carga_pct":72,"estado":"online"},
+    "TRAFO-02  315 kVA": {"kv_p":15.0,"kv_s":0.22,"kva":315,"t_aceite":58.7,"carga_pct":58,"estado":"online"},
+    "TRAFO-03  200 kVA": {"kv_p":15.0,"kv_s":0.22,"kva":200,"t_aceite":42.0,"carga_pct":15,"estado":"standby"},
+}
+SENSORES_AMB = {
+    "Sala Servidores":    {"temp":21.5,"hum":48.0,"smoke":False,"water":False,"lim_t":24,"lim_h":60},
+    "Sala UPS":           {"temp":22.0,"hum":50.0,"smoke":False,"water":False,"lim_t":25,"lim_h":65},
+    "Sala Generadores":   {"temp":23.0,"hum":55.0,"smoke":False,"water":False,"lim_t":27,"lim_h":70},
+    "Pasillo Central":    {"temp":24.5,"hum":52.0,"smoke":False,"water":False,"lim_t":28,"lim_h":70},
+    "Sala Media Tensión": {"temp":28.2,"hum":45.0,"smoke":False,"water":False,"lim_t":35,"lim_h":65},
+    "Bajo Piso / Foso":   {"temp": None,"hum":None, "smoke":False,"water":False,"lim_t":None,"lim_h":None},
+}
+EQUIPOS_SOLAR = {
+    "Inversor FV-01  50 kW": {"p_kw":42.5,"p_max":50,"e_dia":285.3,"e_mes":5840,"pr":82.1,"estado":"online"},
+    "Inversor FV-02  50 kW": {"p_kw":38.2,"p_max":50,"e_dia":261.7,"e_mes":5321,"pr":79.4,"estado":"online"},
+    "Inversor FV-03  30 kW": {"p_kw": 0.0,"p_max":30,"e_dia":  0.0,"e_mes":3102,"pr": 0.0,"estado":"offline"},
+}
+BATERIAS = {
+    "Banco Baterías A": {"soc":85,"soh":96,"v":48.2,"i":-12.5,"t_cel":28.3,"ciclos":142,"cap_kwh":120,"estado":"cargando"},
+    "Banco Baterías B": {"soc":72,"soh":91,"v":47.8,"i": -8.2,"t_cel":27.1,"ciclos":198,"cap_kwh": 80,"estado":"cargando"},
+    "Banco Baterías C": {"soc":35,"soh":78,"v":46.5,"i":  0.0,"t_cel":26.5,"ciclos":412,"cap_kwh": 60,"estado":"standby"},
+}
+
+# ─── FUNCIÓN: SALA 3D CON THREE.JS ────────────────────────────────────────────
+def sala_3d_html(tick, height=500):
+    statuses = {}
+    for eq, info in EQUIPOS.items():
+        if not info["online"]:
+            statuses[eq] = "off"; continue
+        vals = live_values(eq, tick)
+        worst = "ok"
+        for var, val in vals.items():
+            L = vdict(eq)[var]
+            s = estado_val(var, val, L)
+            if s == "🔴": worst = "crit"; break
+            elif s == "⚠️" and worst != "crit": worst = "warn"
+        statuses[eq] = worst
+
+    def st_(key): return statuses.get(key, "ok")
+
+    equip_3d = [
+        {"name":"TRAFO-01 630kVA",  "val":"15kV→440V · 72%",  "x":-7.0,"z":-6.5,"w":2.5,"h":3.0,"d":1.5,"baseColor":0x1a1200,"status":"ok"},
+        {"name":"TRAFO-02 315kVA",  "val":"15kV→220V · 58%",  "x":-4.2,"z":-6.5,"w":2.0,"h":2.8,"d":1.5,"baseColor":0x1a1200,"status":"ok"},
+        {"name":"CELDA MV-1",       "val":"15kV · 320A",       "x":-0.9,"z":-6.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0x0d1520,"status":"ok"},
+        {"name":"CELDA MV-2",       "val":"15kV · 280A",       "x": 0.2,"z":-6.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0x0d1520,"status":"ok"},
+        {"name":"CELDA MV-3",       "val":"15kV · 305A",       "x": 1.3,"z":-6.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0x0d1520,"status":"ok"},
+        {"name":"CELDA MV-4",       "val":"⚠ ALARMA · 298A",  "x": 2.4,"z":-6.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0x0d1520,"status":"warn"},
+        {"name":"CELDA MV-5",       "val":"15kV · 201A",       "x": 3.5,"z":-6.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0x0d1520,"status":"ok"},
+        {"name":"UPS-01 80kVA",     "val":"220V · Bat:85%",    "x":-5.0,"z":-1.0,"w":1.2,"h":2.2,"d":0.8,"baseColor":0x0a1e2a,"status":st_("UPS-01  (80 kVA)")},
+        {"name":"UPS-02 40kVA",     "val":"220V · Bat:92%",    "x":-3.5,"z":-1.0,"w":1.0,"h":2.2,"d":0.8,"baseColor":0x0a1e2a,"status":st_("UPS-02  (40 kVA)")},
+        {"name":"GEN-01 250kVA",    "val":"220V · 1500rpm",    "x": 5.5,"z":-2.0,"w":2.8,"h":1.8,"d":1.4,"baseColor":0x0a1a0a,"status":st_("GEN-01  (250 kVA)")},
+        {"name":"GEN-02 150kVA",    "val":"OFFLINE",           "x": 5.5,"z": 0.5,"w":2.2,"h":1.6,"d":1.2,"baseColor":0x150808,"status":st_("GEN-02  (150 kVA)")},
+        {"name":"AC-01 Servidores", "val":"21.5°C · 48%HR",   "x":-4.0,"z": 5.5,"w":0.9,"h":1.9,"d":0.6,"baseColor":0x1a0f00,"status":st_("AC-01  Sala Servidores")},
+        {"name":"AC-02 Sala UPS",   "val":"22.0°C · 50%HR",   "x":-2.5,"z": 5.5,"w":0.9,"h":1.9,"d":0.6,"baseColor":0x1a0f00,"status":st_("AC-02  Sala UPS")},
+        {"name":"AC-03 Generadores","val":"23.0°C · 55%HR",   "x":-1.0,"z": 5.5,"w":0.9,"h":1.9,"d":0.6,"baseColor":0x1a0800,"status":st_("AC-03  Sala Generadores")},
+        {"name":"TABLERO BT-1",     "val":"440V · 450A",       "x": 2.0,"z":-1.5,"w":0.9,"h":2.0,"d":0.5,"baseColor":0x0a1030,"status":"ok"},
+        {"name":"TABLERO BT-2",     "val":"220V · 280A",       "x": 3.2,"z":-1.5,"w":0.9,"h":2.0,"d":0.5,"baseColor":0x0a1030,"status":"ok"},
+    ]
+    eq_json = json.dumps(equip_3d)
+    H = height
+
+    return f"""<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+*{{margin:0;padding:0;box-sizing:border-box}}
+body{{background:#0a0e1a;overflow:hidden;font-family:monospace}}
+#cc{{position:relative;width:100%;height:{H}px}}
+canvas{{display:block;width:100%!important;height:{H}px!important}}
+.lbl{{position:absolute;pointer-events:none;color:#e0e0e0;font-size:10px;
+      background:rgba(5,10,22,.88);padding:3px 8px;border-radius:4px;
+      border:1px solid #333;white-space:nowrap;transform:translate(-50%,-110%);line-height:1.6}}
+.lbl.ok  {{border-color:#4CAF50}}
+.lbl.warn{{border-color:#FF9800}}
+.lbl.crit{{border-color:#f44336}}
+.lbl.off {{border-color:#607d8b;opacity:.5}}
+#tip{{position:absolute;bottom:8px;right:10px;color:#37474f;font-size:9px}}
+</style></head><body>
+<div id="cc"><canvas id="c"></canvas><div id="lbls"></div>
+<div id="tip">⟳ arrastrar · scroll zoom · clic-derecho pan</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const equipData={eq_json};
+const cc=document.getElementById('cc');
+const W=cc.clientWidth||900,H={H};
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x0a0e1a);
+scene.fog=new THREE.Fog(0x0a0e1a,28,50);
+const camera=new THREE.PerspectiveCamera(52,W/H,.1,100);
+camera.position.set(10,12,17);
+const renderer=new THREE.WebGLRenderer({{canvas:document.getElementById('c'),antialias:true}});
+renderer.setSize(W,H);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const ctrl=new THREE.OrbitControls(camera,renderer.domElement);
+ctrl.enableDamping=true;ctrl.dampingFactor=.08;ctrl.target.set(0,1.5,0);
+ctrl.maxPolarAngle=Math.PI/2.05;ctrl.minDistance=5;ctrl.maxDistance=38;
+scene.add(new THREE.AmbientLight(0x203040,4));
+const sun=new THREE.DirectionalLight(0xffffff,1.3);
+sun.position.set(8,15,8);sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.near=.5;sun.shadow.camera.far=60;
+sun.shadow.camera.left=sun.shadow.camera.bottom=-16;
+sun.shadow.camera.right=sun.shadow.camera.top=16;
+scene.add(sun);
+scene.add(new THREE.DirectionalLight(0x26C6DA,.35));
+const fl=new THREE.Mesh(new THREE.PlaneGeometry(28,24),new THREE.MeshLambertMaterial({{color:0x0d1520}}));
+fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;scene.add(fl);
+const grid=new THREE.GridHelper(28,28,0x1a2a3a,0x111e2a);grid.position.y=.005;scene.add(grid);
+const wallM=new THREE.MeshLambertMaterial({{color:0x07101a,side:THREE.BackSide}});
+const roomM=new THREE.Mesh(new THREE.BoxGeometry(28,10,24),wallM);
+roomM.position.y=5;scene.add(roomM);
+for(let x=-9;x<=9;x+=9)for(let z=-7;z<=7;z+=7){{
+  const pl=new THREE.PointLight(0x26C6DA,.35,15);pl.position.set(x,9,z);scene.add(pl);
+  const fx=new THREE.Mesh(new THREE.BoxGeometry(1.8,.07,.28),new THREE.MeshBasicMaterial({{color:0x1a4a5a}}));
+  fx.position.set(x,9.8,z);scene.add(fx);
+}}
+const SC={{ok:0x4CAF50,warn:0xFF9800,crit:0xf44336,off:0x607d8b}};
+const groups=[];
+function mkEq(e){{
+  const g=new THREE.Group();g.position.set(e.x,e.h/2,e.z);
+  const body=new THREE.Mesh(new THREE.BoxGeometry(e.w,e.h,e.d),
+    new THREE.MeshPhongMaterial({{color:e.baseColor,specular:0x111111,shininess:45}}));
+  body.castShadow=true;body.receiveShadow=true;g.add(body);
+  const sc=SC[e.status]||SC.ok;
+  g.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(e.w,e.h,e.d)),
+    new THREE.LineBasicMaterial({{color:sc}})));
+  const panC=e.status==='ok'?0x003018:e.status==='warn'?0x301800:e.status==='crit'?0x300000:0x101010;
+  const pan=new THREE.Mesh(new THREE.PlaneGeometry(e.w*.88,e.h*.82),
+    new THREE.MeshBasicMaterial({{color:panC,opacity:.75,transparent:true}}));
+  pan.position.set(0,0,e.d/2+.01);g.add(pan);
+  for(let i=-2;i<=2;i++){{
+    const ln=new THREE.Mesh(new THREE.PlaneGeometry(e.w*.82,.022),
+      new THREE.MeshBasicMaterial({{color:sc,opacity:.45,transparent:true}}));
+    ln.position.set(0,i*e.h*.17,e.d/2+.015);g.add(ln);
+  }}
+  const led=new THREE.Mesh(new THREE.SphereGeometry(.07,8,8),new THREE.MeshBasicMaterial({{color:sc}}));
+  led.position.set(e.w/2-.12,e.h/2-.12,e.d/2+.01);g.add(led);
+  const ll=new THREE.PointLight(sc,e.status==='off'?.05:.6,2.5);
+  ll.position.copy(led.position);g.add(ll);
+  g.userData={{...e,ll}};
+  scene.add(g);groups.push(g);
+}}
+equipData.forEach(mkEq);
+const lblsDiv=document.getElementById('lbls');
+const lblEls=equipData.map(e=>{{
+  const d=document.createElement('div');
+  d.className='lbl '+e.status;
+  d.innerHTML='<b>'+e.name+'</b><br><span style="color:#90a4ae">'+e.val+'</span>';
+  lblsDiv.appendChild(d);return d;
+}});
+function proj(p3){{
+  const v=p3.clone().project(camera);
+  return{{x:(v.x+1)/2*W,y:-(v.y-1)/2*H,z:v.z}};
+}}
+const clk=new THREE.Clock();
+(function animate(){{
+  requestAnimationFrame(animate);
+  const t=clk.getElapsedTime();
+  groups.forEach(g=>{{
+    const s=g.userData.status,ll=g.userData.ll;
+    if(s==='crit')ll.intensity=.4+.7*Math.abs(Math.sin(t*3.2));
+    else if(s==='warn')ll.intensity=.4+.35*Math.abs(Math.sin(t*1.6));
+    else if(s==='off')ll.intensity=0;
+    else ll.intensity=.55;
+  }});
+  ctrl.update();renderer.render(scene,camera);
+  groups.forEach((g,i)=>{{
+    const tp=g.position.clone();tp.y+=equipData[i].h/2+.7;
+    const sc=proj(tp),lb=lblEls[i];
+    lb.style.display=sc.z<1?'block':'none';
+    lb.style.left=sc.x+'px';lb.style.top=sc.y+'px';
+  }});
+}})();
+</script></body></html>"""
+
 # ─── SIDEBAR ──────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown(f"""
@@ -327,9 +512,14 @@ with st.sidebar:
 
     pagina = st.radio("Navegación", [
         "🏠  Inicio",
+        "🏭  Sala 3D · Equipos",
         "⚡  Monitoreo UPS",
         "🔋  Monitoreo Generadores",
         "❄️  Monitoreo A/C",
+        "🔌  Media Tensión 3D",
+        "🌡️  Ambiente & Sensores",
+        "📈  Análisis Energético",
+        "☀️  Solar FV",
         "🔔  Gestión de Alarmas",
         "📊  Reporte de Parámetros",
         "📋  Trazabilidad Incidentes",
@@ -933,3 +1123,428 @@ elif pagina == "🌐  Arquitectura del Sistema":
           <b style="color:{col};">✓ {titulo}</b>
           <span style="color:#90a4ae;font-size:0.85rem;"> — {desc}</span>
         </div>""", unsafe_allow_html=True)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PÁGINA: SALA 3D · EQUIPOS
+# ══════════════════════════════════════════════════════════════════════════════
+elif pagina == "🏭  Sala 3D · Equipos":
+    st.markdown("### Sala de Equipos — Vista 3D Interactiva")
+    st.caption("Arrastrar para rotar · Scroll para zoom · Clic derecho para desplazar")
+
+    tick = int(time.time() // 10)
+    components.html(sala_3d_html(tick, height=510), height=515, scrolling=False)
+
+    st.markdown("---")
+    st.markdown("#### Estado en tiempo real")
+    cols_3d = st.columns(min(len(EQUIPOS), 4))
+    for i, (eq, info) in enumerate(EQUIPOS.items()):
+        vals = live_values(eq, tick)
+        var0, val0 = list(vals.items())[0]
+        est = estado_val(var0, val0, vdict(eq)[var0])
+        dot = "🟢" if info["online"] else "🔴"
+        cols_3d[i % 4].markdown(f"""
+        <div style="background:#111827;border-radius:8px;padding:8px 10px;margin-bottom:6px;
+             border-left:3px solid {info['color']};">
+          <div style="color:{info['color']};font-size:0.68rem;font-weight:600;">{dot} {eq.split('(')[0].strip()}</div>
+          <div style="color:white;font-size:0.85rem;">{est} {fmt_val(var0, val0)}</div>
+          <div style="color:#546e7a;font-size:0.7rem;">{info['tipo']}</div>
+        </div>""", unsafe_allow_html=True)
+
+    st.markdown("---")
+    ca3, cb3, cc3 = st.columns(3)
+    mv_ok  = sum(1 for v in EQUIPOS_MV.values()   if v["estado"]=="online")
+    tr_ok  = sum(1 for v in EQUIPOS_TRAFO.values() if v["estado"]=="online")
+    bat_ok = sum(1 for v in BATERIAS.values()      if v["estado"]!="falla")
+    ca3.metric("Celdas MV online",        f"{mv_ok}/{len(EQUIPOS_MV)}")
+    cb3.metric("Transformadores activos", f"{tr_ok}/{len(EQUIPOS_TRAFO)}")
+    cc3.metric("Bancos batería OK",       f"{bat_ok}/{len(BATERIAS)}")
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PÁGINA: MEDIA TENSIÓN 3D
+# ══════════════════════════════════════════════════════════════════════════════
+elif pagina == "🔌  Media Tensión 3D":
+    st.markdown("### Subestación Media Tensión — 15 kV")
+    st.caption("Celdas de media tensión · Transformadores de distribución")
+
+    # KPIs
+    c1m, c2m, c3m, c4m = st.columns(4)
+    mv_online = sum(1 for v in EQUIPOS_MV.values() if v["estado"]=="online")
+    c1m.metric("Celdas MV online",  f"{mv_online}/{len(EQUIPOS_MV)}")
+    c2m.metric("Tensión nominal",   "15 kV")
+    c3m.metric("Trafo principal",   "630 kVA · 72%")
+    c4m.metric("T° aceite TRAFO-01","65.2 °C")
+
+    st.markdown("---")
+    col_mv, col_tr = st.columns([1.1, 1])
+
+    with col_mv:
+        st.markdown("#### Celdas de Media Tensión")
+        for celda, v in EQUIPOS_MV.items():
+            est_c = "#4CAF50" if v["estado"]=="online" else "#FF9800" if v["estado"]=="alarma" else "#607d8b"
+            icon  = "🟢" if v["estado"]=="online" else "⚠️" if v["estado"]=="alarma" else "🔴"
+            st.markdown(f"""
+            <div style="background:#111827;border-radius:8px;padding:10px 14px;margin-bottom:6px;
+                 border-left:4px solid {est_c};">
+              <span style="color:{est_c};font-weight:700;">{icon} {celda}</span>
+              <span style="color:#90a4ae;font-size:0.82rem;"> · {v['tipo']}</span>
+              <span style="float:right;color:white;font-size:0.9rem;font-weight:600;">
+                {v['kv']:.1f} kV &nbsp; | &nbsp; {v['i_a']} A
+              </span>
+            </div>""", unsafe_allow_html=True)
+
+        # 3D mini vista de sala MV
+        st.markdown("#### Vista 3D — Sala Media Tensión")
+        mv_3d = [
+            {"name":"TRAFO-01 630kVA","val":"15kV→440V · 65.2°C","x":-4.5,"z":-1,"w":2.5,"h":3.0,"d":1.5,"baseColor":0x1a1200,"status":"ok"},
+            {"name":"TRAFO-02 315kVA","val":"15kV→220V · 58.7°C","x":-1.5,"z":-1,"w":2.0,"h":2.8,"d":1.5,"baseColor":0x1a1200,"status":"ok"},
+            {"name":"TRAFO-03 200kVA","val":"STANDBY · 42°C",    "x": 1.0,"z":-1,"w":1.8,"h":2.5,"d":1.5,"baseColor":0x150808,"status":"off"},
+            {"name":"CELDA MV-1","val":"15kV · 320A","x":-5.0,"z":2.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0x0d1520,"status":"ok"},
+            {"name":"CELDA MV-2","val":"15kV · 280A","x":-4.0,"z":2.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0x0d1520,"status":"ok"},
+            {"name":"CELDA MV-3","val":"15kV · 305A","x":-3.0,"z":2.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0x0d1520,"status":"ok"},
+            {"name":"CELDA MV-4","val":"⚠ 298A ALARMA", "x":-2.0,"z":2.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0x0d1520,"status":"warn"},
+            {"name":"CELDA MV-5","val":"15kV · 201A","x":-1.0,"z":2.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0x0d1520,"status":"ok"},
+            {"name":"CELDA MV-6","val":"OFFLINE",     "x": 0.0,"z":2.5,"w":0.8,"h":2.5,"d":1.0,"baseColor":0x0d1520,"status":"off"},
+        ]
+        components.html(sala_3d_html(int(time.time()//10), height=360), height=365, scrolling=False)
+
+    with col_tr:
+        st.markdown("#### Transformadores de Distribución")
+        rng_t = np.random.default_rng(int(time.time()//60))
+        for tr_name, tv in EQUIPOS_TRAFO.items():
+            t_noise = float(rng_t.uniform(-1, 1))
+            t_now   = tv["t_aceite"] + t_noise
+            t_color = "#f44336" if t_now > 80 else "#FF9800" if t_now > 70 else "#4CAF50"
+            est_c2  = "#4CAF50" if tv["estado"]=="online" else "#FF9800" if tv["estado"]=="standby" else "#607d8b"
+            st.markdown(f"""
+            <div style="background:#111827;border-radius:10px;padding:12px 16px;margin-bottom:10px;
+                 border:1px solid {est_c2}33;">
+              <div style="color:white;font-weight:700;">{tr_name}</div>
+              <div style="color:#90a4ae;font-size:0.8rem;margin:3px 0;">
+                {tv['kv_p']:.0f} kV → {int(tv['kv_s']*1000)} V &nbsp;·&nbsp; {tv['kva']} kVA
+              </div>
+              <div style="display:flex;gap:1rem;margin-top:6px;">
+                <div><span style="color:#90a4ae;font-size:0.75rem;">Carga</span><br>
+                     <span style="color:{TEAL_L};font-weight:700;">{tv['carga_pct']}%</span></div>
+                <div><span style="color:#90a4ae;font-size:0.75rem;">T° aceite</span><br>
+                     <span style="color:{t_color};font-weight:700;">{t_now:.1f}°C</span></div>
+                <div><span style="color:#90a4ae;font-size:0.75rem;">Estado</span><br>
+                     <span style="color:{est_c2};font-weight:600;">{tv['estado'].upper()}</span></div>
+              </div>
+            </div>""", unsafe_allow_html=True)
+
+        # Carga de transformadores — gauge
+        st.markdown("#### Carga de transformadores")
+        fig_tr = go.Figure()
+        names_tr = list(EQUIPOS_TRAFO.keys())
+        cargas   = [v["carga_pct"] for v in EQUIPOS_TRAFO.values()]
+        colors_tr = ["#4CAF50" if c<70 else "#FF9800" if c<90 else "#f44336" for c in cargas]
+        fig_tr.add_trace(go.Bar(
+            x=[n.split()[0] for n in names_tr], y=cargas,
+            marker_color=colors_tr,
+            text=[f"{c}%" for c in cargas], textposition="outside",
+            textfont=dict(color="white"),
+        ))
+        fig_tr.add_hline(y=80, line_dash="dash", line_color="#FF9800",
+                         annotation_text="Límite recomendado 80%", annotation_font_color="#FF9800")
+        fig_tr.update_layout(paper_bgcolor=CARD2, plot_bgcolor=CARD2, font_color="white",
+                             height=230, yaxis=dict(range=[0,105], title="Carga (%)", gridcolor="#1e2d3e"),
+                             margin=dict(l=40,r=10,t=10,b=30))
+        st.plotly_chart(fig_tr, use_container_width=True)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PÁGINA: AMBIENTE & SENSORES
+# ══════════════════════════════════════════════════════════════════════════════
+elif pagina == "🌡️  Ambiente & Sensores":
+    st.markdown("### Monitoreo de Ambiente y Sensores de Seguridad")
+
+    rng_amb = np.random.default_rng(int(time.time()//30))
+
+    # Tarjetas de sensores
+    sens_cols = st.columns(3)
+    for i, (sala, s) in enumerate(SENSORES_AMB.items()):
+        col_s = sens_cols[i % 3]
+        if s["temp"] is None:
+            status_s = "⚠️ ALARMA" if s["smoke"] or s["water"] else "✓ NORMAL"
+            border_c = "#f44336" if s["smoke"] or s["water"] else "#4CAF50"
+            body_html = f"""
+              <div style="text-align:center;padding:6px 0;">
+                <div style="font-size:1.6rem;">{'🔥' if s['smoke'] else '💧' if s['water'] else '✅'}</div>
+                <div style="color:{border_c};font-size:1rem;font-weight:700;margin-top:4px;">{status_s}</div>
+                <div style="color:#546e7a;font-size:0.72rem;margin-top:2px;">{'Detector humo/agua' if 'Bajo' in sala else 'Detector humo'}</div>
+              </div>"""
+        else:
+            t_now = s["temp"] + float(rng_amb.uniform(-.4,.4))
+            h_now = s["hum"]  + float(rng_amb.uniform(-.8,.8))
+            t_c   = "#f44336" if t_now >= s["lim_t"] else "#FF9800" if t_now >= s["lim_t"]-2 else "#4CAF50"
+            h_c   = "#FF9800" if h_now >= s["lim_h"] else "#4CAF50"
+            border_c = "#f44336" if t_now>=s["lim_t"] or h_now>=s["lim_h"] else "#FF9800" if t_now>=s["lim_t"]-2 else "#4CAF50"
+            body_html = f"""
+              <div style="display:flex;justify-content:space-around;padding:6px 0;">
+                <div style="text-align:center;">
+                  <div style="font-size:1.4rem;">🌡️</div>
+                  <div style="color:{t_c};font-size:1.15rem;font-weight:700;">{t_now:.1f}°C</div>
+                  <div style="color:#546e7a;font-size:0.7rem;">Lím {s['lim_t']}°C</div>
+                </div>
+                <div style="text-align:center;">
+                  <div style="font-size:1.4rem;">💧</div>
+                  <div style="color:{h_c};font-size:1.15rem;font-weight:700;">{h_now:.0f}%</div>
+                  <div style="color:#546e7a;font-size:0.7rem;">Lím {s['lim_h']}%</div>
+                </div>
+              </div>"""
+        col_s.markdown(f"""
+        <div style="background:#111827;border-radius:10px;padding:10px 12px;margin-bottom:10px;
+             border:1px solid {border_c}44;border-top:3px solid {border_c};">
+          <div style="color:white;font-size:0.78rem;font-weight:600;margin-bottom:4px;">📍 {sala}</div>
+          {body_html}
+        </div>""", unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("#### Tendencia de temperatura — últimas 24 h (°C)")
+    sals = [s for s, d in SENSORES_AMB.items() if d["temp"] is not None]
+    colors_amb = [TEAL_L, TEAL, "#66BB6A", "#FFA726", "#FF7043"]
+    t24 = pd.date_range(end=datetime.now(), periods=288, freq="5min")
+    fig_amb = go.Figure()
+    rng_h = np.random.default_rng(42)
+    for j, sala in enumerate(sals):
+        s = SENSORES_AMB[sala]
+        base_t = s["temp"]
+        ts = base_t + np.cumsum(rng_h.normal(0,.06,288))
+        ts = np.clip(ts, base_t-2, base_t+3)
+        lc = colors_amb[j % len(colors_amb)]
+        fig_amb.add_trace(go.Scatter(x=t24, y=ts, mode="lines", name=sala,
+                                     line=dict(color=lc, width=1.5)))
+        if s.get("lim_t"):
+            fig_amb.add_hline(y=s["lim_t"], line_dash="dot", line_color=lc, line_width=.8,
+                               opacity=.4)
+    fig_amb.update_layout(paper_bgcolor=CARD2, plot_bgcolor=CARD2, font_color="white",
+                          height=280, margin=dict(l=45,r=10,t=10,b=35),
+                          xaxis=dict(gridcolor="#1e2d3e"),
+                          yaxis=dict(gridcolor="#1e2d3e", title="°C"),
+                          legend=dict(bgcolor=CARD2, font=dict(size=10)))
+    st.plotly_chart(fig_amb, use_container_width=True)
+
+    st.markdown("#### Tendencia de humedad relativa — últimas 24 h (%)")
+    fig_hum = go.Figure()
+    rng_h2 = np.random.default_rng(99)
+    for j, sala in enumerate(sals):
+        s = SENSORES_AMB[sala]
+        base_h = s["hum"]
+        hs = base_h + np.cumsum(rng_h2.normal(0,.12,288))
+        hs = np.clip(hs, base_h-5, base_h+8)
+        lc = colors_amb[j % len(colors_amb)]
+        fig_hum.add_trace(go.Scatter(x=t24, y=hs, mode="lines", name=sala,
+                                      line=dict(color=lc, width=1.5)))
+    fig_hum.update_layout(paper_bgcolor=CARD2, plot_bgcolor=CARD2, font_color="white",
+                          height=240, margin=dict(l=45,r=10,t=10,b=35),
+                          xaxis=dict(gridcolor="#1e2d3e"),
+                          yaxis=dict(gridcolor="#1e2d3e", title="%HR"),
+                          legend=dict(bgcolor=CARD2, font=dict(size=10)))
+    st.plotly_chart(fig_hum, use_container_width=True)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PÁGINA: ANÁLISIS ENERGÉTICO
+# ══════════════════════════════════════════════════════════════════════════════
+elif pagina == "📈  Análisis Energético":
+    st.markdown("### Análisis Energético — Consumo y Demanda")
+
+    rng_e = np.random.default_rng(7)
+    months = ["Dic'25","Ene'26","Feb'26","Mar'26","Abr'26","May'26"]
+    kwh_month = [9420, 9780, 9150, 10320, 9870, 5840]
+
+    c1e,c2e,c3e,c4e = st.columns(4)
+    c1e.metric("Consumo mes actual", f"{kwh_month[-1]:,} kWh", f"{kwh_month[-1]-kwh_month[-2]:+,} vs mes ant.")
+    c2e.metric("Demanda máx. actual","148.2 kW", "+4.1 kW vs mes ant.")
+    c3e.metric("Factor de potencia", "0.924", "+0.012")
+    c4e.metric("CO₂ evitado (FV)",   "3.8 t",  "+0.4 t")
+
+    st.markdown("---")
+    col_e1, col_e2 = st.columns(2)
+
+    with col_e1:
+        st.markdown("#### Consumo mensual (kWh)")
+        fig_mon = go.Figure()
+        bar_cols = ["#26C6DA" if i < len(months)-1 else TEAL for i in range(len(months))]
+        fig_mon.add_trace(go.Bar(
+            x=months, y=kwh_month,
+            marker_color=bar_cols,
+            text=[f"{v:,}" for v in kwh_month],
+            textposition="outside",
+            textfont=dict(color="white", size=10),
+        ))
+        fig_mon.update_layout(paper_bgcolor=CARD2, plot_bgcolor=CARD2, font_color="white",
+                              height=280, margin=dict(l=40,r=10,t=10,b=30),
+                              yaxis=dict(gridcolor="#1e2d3e", title="kWh"),
+                              xaxis=dict(gridcolor="#1e2d3e"))
+        st.plotly_chart(fig_mon, use_container_width=True)
+
+    with col_e2:
+        st.markdown("#### Distribución por tipo de equipo")
+        equip_types = ["UPS (80 kVA)","UPS (40 kVA)","Generadores","Aires A/C","Iluminación","Otros"]
+        kwh_equip   = [1420, 820, 680, 1580, 340, 1000]
+        fig_pie_e = go.Figure(go.Pie(
+            labels=equip_types, values=kwh_equip, hole=0.55,
+            marker_colors=[TEAL_L, TEAL, "#66BB6A", "#FFA726", "#AB47BC", "#607d8b"],
+            textinfo="label+percent", textfont_size=10,
+        ))
+        fig_pie_e.update_layout(paper_bgcolor=CARD2, font_color="white",
+                                height=280, margin=dict(l=10,r=10,t=10,b=10),
+                                showlegend=False,
+                                annotations=[dict(text=f"<b>{sum(kwh_equip):,}</b><br>kWh",
+                                                  x=.5,y=.5, showarrow=False,
+                                                  font=dict(size=13,color="white"))])
+        st.plotly_chart(fig_pie_e, use_container_width=True)
+
+    st.markdown("#### Curva de demanda diaria — promedio últimos 30 días (kW)")
+    horas = list(range(24))
+    base_dem = [45,40,38,36,35,36,42,68,112,135,148,142,
+                138,145,150,148,140,132,118,98,82,72,62,52]
+    noise_d = rng_e.normal(0, 3, 24)
+    dem_hoy = np.array(base_dem, dtype=float) + noise_d
+    dem_hoy = np.clip(dem_hoy, 30, 165)
+    fig_dem = go.Figure()
+    fig_dem.add_trace(go.Scatter(
+        x=horas, y=dem_hoy, mode="lines+markers",
+        line=dict(color=TEAL_L, width=2.5),
+        fill="tozeroy", fillcolor="rgba(38,198,218,0.08)",
+        marker=dict(size=5, color=TEAL_L),
+        name="Demanda hoy",
+    ))
+    fig_dem.add_trace(go.Scatter(
+        x=horas, y=base_dem, mode="lines",
+        line=dict(color="#607d8b", width=1.2, dash="dot"),
+        name="Promedio 30d",
+    ))
+    fig_dem.add_hline(y=150, line_dash="dash", line_color="#f44336",
+                      annotation_text="Límite contratado 150 kW",
+                      annotation_font_color="#f44336")
+    fig_dem.update_layout(
+        paper_bgcolor=CARD2, plot_bgcolor=CARD2, font_color="white",
+        height=300, margin=dict(l=45,r=10,t=10,b=35),
+        xaxis=dict(title="Hora", tickvals=list(range(0,24,2)),
+                   ticktext=[f"{h:02d}:00" for h in range(0,24,2)],
+                   gridcolor="#1e2d3e"),
+        yaxis=dict(title="kW", gridcolor="#1e2d3e"),
+        legend=dict(bgcolor=CARD2),
+    )
+    st.plotly_chart(fig_dem, use_container_width=True)
+
+    st.markdown("#### Reporte comparativo mensual")
+    df_cmp = pd.DataFrame({
+        "Mes":     months,
+        "kWh":     kwh_month,
+        "kW Máx":  [132,138,128,145,142,148],
+        "FP":      [0.91,0.912,0.908,0.918,0.921,0.924],
+        "CO₂ (t)": [4.2,4.4,4.1,4.6,4.4,2.6],
+        "$/kWh":   [0.098,0.101,0.097,0.103,0.099,0.102],
+    })
+    df_cmp["Costo ($)"] = (df_cmp["kWh"] * df_cmp["$/kWh"]).round(2)
+    st.dataframe(df_cmp, hide_index=True, use_container_width=True)
+    buf_e = io.StringIO()
+    df_cmp.to_csv(buf_e, index=False)
+    st.download_button("⬇️ Exportar CSV", buf_e.getvalue(),
+                       file_name=f"energia_{datetime.now().strftime('%Y%m')}.csv", mime="text/csv")
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PÁGINA: SOLAR FV
+# ══════════════════════════════════════════════════════════════════════════════
+elif pagina == "☀️  Solar FV":
+    st.markdown("### Monitoreo Solar Fotovoltaico — Sistema FV 130 kWp")
+
+    total_p  = sum(v["p_kw"]  for v in EQUIPOS_SOLAR.values())
+    total_ed = sum(v["e_dia"] for v in EQUIPOS_SOLAR.values())
+    total_em = sum(v["e_mes"] for v in EQUIPOS_SOLAR.values())
+    invs_on  = sum(1 for v in EQUIPOS_SOLAR.values() if v["estado"]=="online")
+
+    c1s,c2s,c3s,c4s = st.columns(4)
+    c1s.metric("Potencia actual",    f"{total_p:.1f} kW",   f"de 130 kWp")
+    c2s.metric("Energía hoy",        f"{total_ed:.0f} kWh", "+12% vs ayer")
+    c3s.metric("Energía este mes",   f"{total_em:,.0f} kWh")
+    c4s.metric("Inversores online",  f"{invs_on}/{len(EQUIPOS_SOLAR)}")
+
+    st.markdown("---")
+    col_s1, col_s2 = st.columns([1.3, 1])
+
+    with col_s1:
+        st.markdown("#### Curva de generación diaria (kW)")
+        horas_s = list(range(6, 19))
+        gen_curve = [0.2,2.8,12.5,28.4,40.2,52.8,62.1,72.4,68.3,58.9,44.2,26.7,8.3]
+        rng_s = np.random.default_rng(int(time.time()//600))
+        now_h = datetime.now().hour
+        gen_now = [v + float(rng_s.uniform(-.8,.8)) for v in gen_curve]
+        gen_now = [v if h <= now_h else None for h, v in zip(horas_s, gen_now)]
+        gen_pred = gen_curve[:]
+        hora_labels = [f"{h:02d}:00" for h in horas_s]
+        fig_fv = go.Figure()
+        fig_fv.add_trace(go.Scatter(
+            x=hora_labels, y=gen_now, mode="lines+markers",
+            line=dict(color="#FDD835", width=2.5),
+            fill="tozeroy", fillcolor="rgba(253,216,53,0.1)",
+            marker=dict(size=5, color="#FDD835"), name="Generación real",
+        ))
+        fig_fv.add_trace(go.Scatter(
+            x=hora_labels, y=gen_pred, mode="lines",
+            line=dict(color="#607d8b", width=1.2, dash="dot"), name="Pronóstico",
+        ))
+        fig_fv.update_layout(paper_bgcolor=CARD2, plot_bgcolor=CARD2, font_color="white",
+                             height=290, margin=dict(l=45,r=10,t=10,b=30),
+                             xaxis=dict(gridcolor="#1e2d3e"),
+                             yaxis=dict(title="kW", gridcolor="#1e2d3e"),
+                             legend=dict(bgcolor=CARD2))
+        st.plotly_chart(fig_fv, use_container_width=True)
+
+        st.markdown("#### Generación mensual — últimos 6 meses (kWh)")
+        meses_s = ["Dic'25","Ene'26","Feb'26","Mar'26","Abr'26","May'26"]
+        gen_mes  = [12840,11520,13180,14250,13820,6180]
+        fig_gm = go.Figure(go.Bar(
+            x=meses_s, y=gen_mes,
+            marker_color=["#FDD835" if i==len(meses_s)-1 else "#F9A825" for i in range(len(meses_s))],
+            text=[f"{v:,}" for v in gen_mes], textposition="outside",
+            textfont=dict(color="white",size=10),
+        ))
+        fig_gm.update_layout(paper_bgcolor=CARD2, plot_bgcolor=CARD2, font_color="white",
+                             height=240, margin=dict(l=40,r=10,t=10,b=30),
+                             yaxis=dict(gridcolor="#1e2d3e",title="kWh"))
+        st.plotly_chart(fig_gm, use_container_width=True)
+
+    with col_s2:
+        st.markdown("#### Estado de inversores")
+        for inv_name, iv in EQUIPOS_SOLAR.items():
+            est_c = TEAL_L if iv["estado"]=="online" else "#607d8b"
+            pr_c  = "#4CAF50" if iv["pr"]>75 else "#FF9800" if iv["pr"]>60 else "#f44336"
+            st.markdown(f"""
+            <div style="background:#111827;border-radius:10px;padding:12px 14px;margin-bottom:10px;
+                 border-left:4px solid {est_c};">
+              <div style="color:white;font-weight:700;">{inv_name}</div>
+              <div style="display:flex;gap:1rem;margin-top:6px;flex-wrap:wrap;">
+                <div><span style="color:#90a4ae;font-size:0.72rem;">Potencia</span><br>
+                     <span style="color:{TEAL_L};font-size:1rem;font-weight:700;">{iv['p_kw']:.1f} kW</span>
+                     <span style="color:#546e7a;font-size:0.7rem;">/{iv['p_max']} kW</span></div>
+                <div><span style="color:#90a4ae;font-size:0.72rem;">E. hoy</span><br>
+                     <span style="color:white;font-weight:600;">{iv['e_dia']:.1f} kWh</span></div>
+                <div><span style="color:#90a4ae;font-size:0.72rem;">PR</span><br>
+                     <span style="color:{pr_c};font-weight:700;">{iv['pr']:.1f}%</span></div>
+                <div><span style="color:#90a4ae;font-size:0.72rem;">Estado</span><br>
+                     <span style="color:{est_c};font-weight:600;">{iv['estado'].upper()}</span></div>
+              </div>
+            </div>""", unsafe_allow_html=True)
+
+        # Baterías de respaldo
+        st.markdown("#### Bancos de baterías")
+        for bat_name, bv in BATERIAS.items():
+            soc_c = "#4CAF50" if bv["soc"]>50 else "#FF9800" if bv["soc"]>20 else "#f44336"
+            soh_c = "#4CAF50" if bv["soh"]>85 else "#FF9800" if bv["soh"]>70 else "#f44336"
+            est_c = TEAL_L if bv["estado"]=="cargando" else "#607d8b"
+            st.markdown(f"""
+            <div style="background:#111827;border-radius:10px;padding:10px 14px;margin-bottom:8px;
+                 border-left:4px solid {soc_c};">
+              <div style="color:white;font-size:0.85rem;font-weight:700;">{bat_name}</div>
+              <div style="background:#0d1520;border-radius:4px;height:8px;margin:6px 0;overflow:hidden;">
+                <div style="background:{soc_c};width:{bv['soc']}%;height:100%;border-radius:4px;"></div>
+              </div>
+              <div style="display:flex;gap:1rem;font-size:0.75rem;">
+                <span style="color:{soc_c};">SOC <b>{bv['soc']}%</b></span>
+                <span style="color:{soh_c};">SOH <b>{bv['soh']}%</b></span>
+                <span style="color:#90a4ae;">{bv['v']:.1f} V &nbsp; {bv['i']:+.1f} A</span>
+                <span style="color:{est_c};">{bv['estado'].upper()}</span>
+              </div>
+            </div>""", unsafe_allow_html=True)
